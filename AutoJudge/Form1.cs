@@ -35,6 +35,8 @@ namespace coderunner2015
         string problemNowS = "A"; // 現在解いている問題
         bool tabChanged = false; // タブが変わった時にジャッジされないように
 
+        bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
+
         System.Diagnostics.Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
 
@@ -54,6 +56,7 @@ namespace coderunner2015
                 this.ControlBox = false;
                 this.Text = "";
             }
+            // BackColor = Color.Green;
 
             init();
         }
@@ -106,6 +109,10 @@ namespace coderunner2015
             if (style == 0 || style == 1)
                 makeCloseBtn(tabHeight, tabHeight, 600 - tabHeight, 0);
 
+            int updateOnActivatedCheckBoxX = 450, updateOnActivatedCheckBoxY = 0;
+            int updateOnActivatedCheckBoxHeight = 20, updateOnActivatedCheckBoxWidth = 20;
+            makeUpdateOnActivatedCheckBox(updateOnActivatedCheckBoxWidth, updateOnActivatedCheckBoxHeight, updateOnActivatedCheckBoxX, updateOnActivatedCheckBoxY);
+
             int txtbxHeight = 80, txtbxWidth = 100, txtbxOffset = 1, txtbxMergLeft = 5, txtbxMergUp = 50;
             int inputAnsMerge = 10;
             int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputAnsMerge;
@@ -126,6 +133,7 @@ namespace coderunner2015
                 int y = mergUp;
                 makeBtn(btnTabs[i], "btnTab" + problemStrs[i], problemStrs[i], height, width, x, y, new EventHandler(btnTabs_Click));
             }
+            btnTabs[0].BackColor = Color.White;
         }
         private System.Windows.Forms.Button[] btnTabs;
         private void btnTabs_Click(object sender, EventArgs e)
@@ -162,13 +170,43 @@ namespace coderunner2015
         private System.Windows.Forms.Button btnExeAll;
         private void btnExeAll_Click(object sender, EventArgs e)
         {
-            exeAll();
-            checkAll();
+            exeAllcheckAll();
         }
         private void makeCloseBtn(int height, int width, int x, int y)
         {
             btnClose = new System.Windows.Forms.Button();
             makeBtn(btnClose, "btnCloase", "X", height, width, x, y, new EventHandler(btnClose_Click));
+        }
+        private void makeUpdateOnActivatedCheckBox(int height, int width, int x, int y)
+        {
+            chBoxUpdateOnActivated = new System.Windows.Forms.CheckBox();
+            SuspendLayout();
+            //プロパティ設定
+            chBoxUpdateOnActivated.Name = "chBoxUpdateOnActivated";
+            chBoxUpdateOnActivated.AutoSize = false;
+            chBoxUpdateOnActivated.Size = new Size(width, height);
+            chBoxUpdateOnActivated.Location = new Point(x, y);
+            chBoxUpdateOnActivated.FlatStyle = FlatStyle.Flat;
+            chBoxUpdateOnActivated.BackColor = Color.Transparent;
+            chBoxUpdateOnActivated.FlatAppearance.CheckedBackColor = Color.Gray;
+            //chBoxUpdateOnActivated.FlatAppearance.MouseOverBackColor = Color.Red;
+            chBoxUpdateOnActivated.FlatAppearance.BorderSize = 0;
+            chBoxUpdateOnActivated.FlatAppearance.BorderColor = Color.Gray;
+            //chBoxUpdateOnActivated.ForeColor = Color.Green;
+            //chBoxUpdateOnActivated.FlatAppearance.MouseOverBackColor = Color.Red;
+            chBoxUpdateOnActivated.Appearance = Appearance.Button;
+            chBoxUpdateOnActivated.CheckState = CheckState.Checked;
+            //イベントハンドラに関連付け
+            chBoxUpdateOnActivated.Click += new EventHandler(chBoxUpdateOnActivated_Click);
+            //フォームにコントロールを追加
+            Controls.Add(chBoxUpdateOnActivated);
+            ResumeLayout(false);
+
+        }
+        private System.Windows.Forms.CheckBox chBoxUpdateOnActivated;
+        private void chBoxUpdateOnActivated_Click(object sender, EventArgs e)
+        {
+            updateOnActivated = ((System.Windows.Forms.CheckBox)sender).Checked;
         }
 
         // 色指定必要
@@ -208,6 +246,12 @@ namespace coderunner2015
                 checkAns(i);
         }
 
+        private void exeAllcheckAll()
+        {
+            exeAll();
+            checkAll();
+        }
+
         private void makeInputTxtBox(int height, int width, int offset, int mergLeft, int mergUp)
         {
             txtbxInputs = new System.Windows.Forms.TextBox[testCaseNum];
@@ -225,11 +269,14 @@ namespace coderunner2015
                 txtbxInputs[i].Multiline = true;
                 //イベントハンドラに関連付け
                 txtbxInputs[i].TextChanged += new EventHandler(txtbxInputs_Changed);
+                txtbxInputs[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
+                
             }
             //フォームにコントロールを追加
             Controls.AddRange(txtbxInputs);
             ResumeLayout(false);
         }
+
         private void makeAnswerTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputAnsMerge)
         {
             txtbxAnswers = new System.Windows.Forms.TextBox[testCaseNum];
@@ -247,6 +294,7 @@ namespace coderunner2015
                 txtbxAnswers[i].Multiline = true;
                 //イベントハンドラに関連付け
                 txtbxAnswers[i].TextChanged += new EventHandler(txtbxAnswers_Changed);
+                txtbxAnswers[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
             }
             //フォームにコントロールを追加
             Controls.AddRange(txtbxAnswers);
@@ -329,6 +377,13 @@ namespace coderunner2015
                 checkAns(txtboxIDn);
             }
         }
+        // Ctr + A で全選択
+        private void textBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+                ((System.Windows.Forms.TextBox)sender).SelectAll();
+        }
+        
         private System.Windows.Forms.Label[] labelSample;
         private System.Windows.Forms.Label[] labelCheck;
 
@@ -414,12 +469,6 @@ namespace coderunner2015
         }
 
 
-        private string getArgument_result()
-        {
-            //return @"C:\Users\blackhat\GoogleDrive\ProgrammingContest\ruby\vimcodes\A.rb" + " < " + @"C:\Users\blackhat\Desktop\testcase.txt";
-            return "C:\\Users\\blackhat\\GoogleDrive\\ProgrammingContest\\ruby\\vimcodes\\A.rb < C:\\Users\\blackhat\\Desktop\\testcase.txt";
-        }
-
         private string startPSI(ProcessStartInfo psi)
         {
             Process p = Process.Start(psi); // アプリの実行開始
@@ -429,6 +478,28 @@ namespace coderunner2015
 
         private void No_Click(object sender, EventArgs e)
         {
+        }
+
+        // ダブルクリックした時にジャッジ
+        private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            exeAllcheckAll();
+        }
+
+        // 何かキーを押した時にジャッジ, 動かない
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            exeAllcheckAll();
+        }
+
+        // フォームをウィンドウの最前面に持ってくるたびにジャッジ
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            if (updateOnActivated)
+            {
+                exeAllcheckAll();
+                //System.Console.WriteLine("test");
+            }
         }
     }
 }
