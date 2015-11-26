@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-namespace coderunner2015
+namespace AutoJudge
 {
     public partial class Form1 : Form
     {
@@ -39,6 +39,16 @@ namespace coderunner2015
 
         System.Diagnostics.Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
+
+        private System.Windows.Forms.Button[] btnTabs;
+        private System.Windows.Forms.Button btnExeAll;
+        private System.Windows.Forms.CheckBox chBoxUpdateOnActivated;
+        private System.Windows.Forms.Button btnMinimize;
+        private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.TextBox[] txtbxInputs;
+        private System.Windows.Forms.TextBox[] txtbxAnswers;
+        private System.Windows.Forms.Label[] labelSample;
+        private System.Windows.Forms.Label[] labelCheck;
 
         public Form1()
         {
@@ -106,8 +116,11 @@ namespace coderunner2015
 
             makeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
             makeExeAllBtn(exeAllBtnHeight, exeAllBtnWidth, exeAllBtnX, exeAllBtnY);
-            if (style == 0 || style == 1)
+            if (style == 1 || style == 2)
+            {
                 makeCloseBtn(tabHeight, tabHeight, 600 - tabHeight, 0);
+                makeMinimizeBtn(tabHeight, tabHeight, 600 - 2 * tabHeight, 0);
+            }
 
             int updateOnActivatedCheckBoxX = 450, updateOnActivatedCheckBoxY = 0;
             int updateOnActivatedCheckBoxHeight = 20, updateOnActivatedCheckBoxWidth = 20;
@@ -135,7 +148,7 @@ namespace coderunner2015
             }
             btnTabs[0].BackColor = Color.White;
         }
-        private System.Windows.Forms.Button[] btnTabs;
+
         private void btnTabs_Click(object sender, EventArgs e)
         {
             string btnName = ((System.Windows.Forms.Button)sender).Name;
@@ -167,7 +180,6 @@ namespace coderunner2015
             btnExeAll = new System.Windows.Forms.Button();
             makeBtn(btnExeAll, "btnExeAll", "update", height, width, x, y, new EventHandler(btnExeAll_Click));
         }
-        private System.Windows.Forms.Button btnExeAll;
         private void btnExeAll_Click(object sender, EventArgs e)
         {
             exeAllcheckAll();
@@ -176,6 +188,11 @@ namespace coderunner2015
         {
             btnClose = new System.Windows.Forms.Button();
             makeBtn(btnClose, "btnCloase", "X", height, width, x, y, new EventHandler(btnClose_Click));
+        }
+        private void makeMinimizeBtn(int height, int width, int x, int y)
+        {
+            btnClose = new System.Windows.Forms.Button();
+            makeBtn(btnClose, "btnMinimize", "-", height, width, x, y, new EventHandler(btnClose_Minimized));
         }
         private void makeUpdateOnActivatedCheckBox(int height, int width, int x, int y)
         {
@@ -189,11 +206,8 @@ namespace coderunner2015
             chBoxUpdateOnActivated.FlatStyle = FlatStyle.Flat;
             chBoxUpdateOnActivated.BackColor = Color.Transparent;
             chBoxUpdateOnActivated.FlatAppearance.CheckedBackColor = Color.Gray;
-            //chBoxUpdateOnActivated.FlatAppearance.MouseOverBackColor = Color.Red;
             chBoxUpdateOnActivated.FlatAppearance.BorderSize = 0;
             chBoxUpdateOnActivated.FlatAppearance.BorderColor = Color.Gray;
-            //chBoxUpdateOnActivated.ForeColor = Color.Green;
-            //chBoxUpdateOnActivated.FlatAppearance.MouseOverBackColor = Color.Red;
             chBoxUpdateOnActivated.Appearance = Appearance.Button;
             chBoxUpdateOnActivated.CheckState = CheckState.Checked;
             //イベントハンドラに関連付け
@@ -203,7 +217,6 @@ namespace coderunner2015
             ResumeLayout(false);
 
         }
-        private System.Windows.Forms.CheckBox chBoxUpdateOnActivated;
         private void chBoxUpdateOnActivated_Click(object sender, EventArgs e)
         {
             updateOnActivated = ((System.Windows.Forms.CheckBox)sender).Checked;
@@ -219,7 +232,6 @@ namespace coderunner2015
             btn.Size = new Size(width, height);
             btn.Location = new Point(x, y);
             btn.FlatStyle = FlatStyle.Flat;
-            //btn.FlatAppearance.MouseDownBackColor = Color.White;
             btn.FlatAppearance.MouseOverBackColor = Color.White;
             btn.FlatAppearance.BorderSize = 0;
             //イベントハンドラに関連付け
@@ -228,10 +240,15 @@ namespace coderunner2015
             Controls.Add(btn);
             ResumeLayout(false);
         }
-        private System.Windows.Forms.Button btnClose;
         private void btnClose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void btnClose_Minimized(object sender, EventArgs e)
+        {
+            // フォームを最小化
+            this.WindowState = FormWindowState.Minimized;
         }
 
         private void exeAll()
@@ -338,7 +355,6 @@ namespace coderunner2015
             Controls.AddRange(labelCheck);
             ResumeLayout(false);
         }
-        private System.Windows.Forms.TextBox[] txtbxInputs;
         private void txtbxInputs_Changed(object sender, EventArgs e)
         {
             if (tabChanged)
@@ -360,7 +376,6 @@ namespace coderunner2015
                 checkAns(txtboxIDn);
             }
         }
-        private System.Windows.Forms.TextBox[] txtbxAnswers;
         private void txtbxAnswers_Changed(object sender, EventArgs e)
         {
             if (tabChanged)
@@ -383,9 +398,6 @@ namespace coderunner2015
             if (e.Control && e.KeyCode == Keys.A)
                 ((System.Windows.Forms.TextBox)sender).SelectAll();
         }
-        
-        private System.Windows.Forms.Label[] labelSample;
-        private System.Windows.Forms.Label[] labelCheck;
 
         // 出力が正しいかを判定して表示
         private void checkAns(int id)
@@ -476,10 +488,6 @@ namespace coderunner2015
             return output.Replace("\r\r\n", "\n"); // 改行コードの修正
         }
 
-        private void No_Click(object sender, EventArgs e)
-        {
-        }
-
         // ダブルクリックした時にジャッジ
         private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -496,10 +504,7 @@ namespace coderunner2015
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (updateOnActivated)
-            {
                 exeAllcheckAll();
-                //System.Console.WriteLine("test");
-            }
         }
     }
 }

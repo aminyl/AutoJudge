@@ -1,4 +1,4 @@
-﻿namespace coderunner2015
+﻿namespace AutoJudge
 {
     partial class Form1
     {
