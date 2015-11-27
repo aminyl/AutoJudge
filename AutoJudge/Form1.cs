@@ -40,22 +40,9 @@ namespace AutoJudge
         System.Diagnostics.Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
 
-        private System.Windows.Forms.Button[] btnTabs;
-        private System.Windows.Forms.Button btnExeAll;
-        private System.Windows.Forms.CheckBox chBoxUpdateOnActivated;
-        private System.Windows.Forms.Button btnMinimize;
-        private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.TextBox[] txtbxInputs;
-        private System.Windows.Forms.TextBox[] txtbxAnswers;
-        private System.Windows.Forms.Label[] labelSample;
-        private System.Windows.Forms.Label[] labelCheck;
-
         public Form1()
         {
             InitializeComponent();
-            // フォームのサイズ変更
-            SuspendLayout();
-            ClientSize = new System.Drawing.Size(600, 500);
 
             if (style == 1) // タイトルバーをなくす
             {
@@ -68,14 +55,12 @@ namespace AutoJudge
             }
             // BackColor = Color.Green;
 
+
             init();
         }
 
-        // マウスのクリック位置を記憶
-        private Point mousePoint;
-
         // マウスのボタンが押されたとき : Form1のタイトルバーをなくした時に，フォームを移動できるように
-        private void Form1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
             if (style == 0) return;
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left)
@@ -86,7 +71,7 @@ namespace AutoJudge
         }
 
         // マウスが動いたとき : Form1のタイトルバーをなくした時に，フォームを移動できるように
-        private void Form1_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
             if (style == 0) return;
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left)
@@ -107,51 +92,9 @@ namespace AutoJudge
             makeControlls();
         }
 
-        private void makeControlls()
-        {
-            int tabHeight = 23, tabWidth = 48, tabOffset = 1, tabMergLeft = 0, tabMergUp = 0;
-            int exeAllBtnHeight = tabHeight, exeAllBtnWidth = tabWidth;
-            int exeAllBtnX = 500;
-            int exeAllBtnY = tabMergUp;
-
-            makeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
-            makeExeAllBtn(exeAllBtnHeight, exeAllBtnWidth, exeAllBtnX, exeAllBtnY);
-            if (style == 1 || style == 2)
-            {
-                makeCloseBtn(tabHeight, tabHeight, 600 - tabHeight, 0);
-                makeMinimizeBtn(tabHeight, tabHeight, 600 - 2 * tabHeight, 0);
-            }
-
-            int updateOnActivatedCheckBoxX = 450, updateOnActivatedCheckBoxY = 0;
-            int updateOnActivatedCheckBoxHeight = 20, updateOnActivatedCheckBoxWidth = 20;
-            makeUpdateOnActivatedCheckBox(updateOnActivatedCheckBoxWidth, updateOnActivatedCheckBoxHeight, updateOnActivatedCheckBoxX, updateOnActivatedCheckBoxY);
-
-            int txtbxHeight = 80, txtbxWidth = 100, txtbxOffset = 1, txtbxMergLeft = 5, txtbxMergUp = 50;
-            int inputAnsMerge = 10;
-            int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputAnsMerge;
-            int checkLblX = txtbxMergLeft + 3 * txtbxWidth + inputAnsMerge;
-            makeInputTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp);
-            makeAnswerTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp, inputAnsMerge);
-            makeSampleLable(txtbxHeight, sampleLblX, txtbxOffset, txtbxMergUp);
-            makeCheckLable(txtbxHeight, checkLblX, txtbxOffset, txtbxMergUp);
-        }
-
-        private void makeTabBtn(int height, int width, int offset, int mergLeft, int mergUp)
-        {
-            btnTabs = new System.Windows.Forms.Button[problemNum];
-            for (int i = 0; i < btnTabs.Length; i++)
-            {
-                btnTabs[i] = new System.Windows.Forms.Button();
-                int x = i * width - i * offset + mergLeft;
-                int y = mergUp;
-                makeBtn(btnTabs[i], "btnTab" + problemStrs[i], problemStrs[i], height, width, x, y, new EventHandler(btnTabs_Click));
-            }
-            btnTabs[0].BackColor = Color.White;
-        }
-
         private void btnTabs_Click(object sender, EventArgs e)
         {
-            string btnName = ((System.Windows.Forms.Button)sender).Name;
+            string btnName = ((Button)sender).Name;
             string btnID = btnName.Substring(btnName.Length - 1);
             problemNowN = problemTable[btnID];
             problemNowS = btnID;
@@ -173,81 +116,43 @@ namespace AutoJudge
             // 選択されているタブの色を白色に
             for (int i = 0; i < problemNum; i++)
                 btnTabs[i].BackColor = Color.Transparent;
-            ((System.Windows.Forms.Button)sender).BackColor = Color.White;
+            ((Button)sender).BackColor = Color.White;
         }
-        private void makeExeAllBtn(int height, int width, int x, int y)
-        {
-            btnExeAll = new System.Windows.Forms.Button();
-            makeBtn(btnExeAll, "btnExeAll", "update", height, width, x, y, new EventHandler(btnExeAll_Click));
-        }
+
         private void btnExeAll_Click(object sender, EventArgs e)
         {
             exeAllcheckAll();
         }
-        private void makeCloseBtn(int height, int width, int x, int y)
-        {
-            btnClose = new System.Windows.Forms.Button();
-            makeBtn(btnClose, "btnCloase", "X", height, width, x, y, new EventHandler(btnClose_Click));
-        }
-        private void makeMinimizeBtn(int height, int width, int x, int y)
-        {
-            btnClose = new System.Windows.Forms.Button();
-            makeBtn(btnClose, "btnMinimize", "-", height, width, x, y, new EventHandler(btnClose_Minimized));
-        }
-        private void makeUpdateOnActivatedCheckBox(int height, int width, int x, int y)
-        {
-            chBoxUpdateOnActivated = new System.Windows.Forms.CheckBox();
-            SuspendLayout();
-            //プロパティ設定
-            chBoxUpdateOnActivated.Name = "chBoxUpdateOnActivated";
-            chBoxUpdateOnActivated.AutoSize = false;
-            chBoxUpdateOnActivated.Size = new Size(width, height);
-            chBoxUpdateOnActivated.Location = new Point(x, y);
-            chBoxUpdateOnActivated.FlatStyle = FlatStyle.Flat;
-            chBoxUpdateOnActivated.BackColor = Color.Transparent;
-            chBoxUpdateOnActivated.FlatAppearance.CheckedBackColor = Color.Gray;
-            chBoxUpdateOnActivated.FlatAppearance.BorderSize = 0;
-            chBoxUpdateOnActivated.FlatAppearance.BorderColor = Color.Gray;
-            chBoxUpdateOnActivated.Appearance = Appearance.Button;
-            chBoxUpdateOnActivated.CheckState = CheckState.Checked;
-            //イベントハンドラに関連付け
-            chBoxUpdateOnActivated.Click += new EventHandler(chBoxUpdateOnActivated_Click);
-            //フォームにコントロールを追加
-            Controls.Add(chBoxUpdateOnActivated);
-            ResumeLayout(false);
 
-        }
-        private void chBoxUpdateOnActivated_Click(object sender, EventArgs e)
+        private void btnUpdate_MouseUp(object sender, MouseEventArgs e)
         {
-            updateOnActivated = ((System.Windows.Forms.CheckBox)sender).Checked;
+            if (e.Button == MouseButtons.Left)
+            {
+                if (!updateOnActivated) {
+                    exeAllcheckAll();
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                updateOnActivated = !updateOnActivated;
+                setUpdateBtn(updateOnActivated ? 1 : 0);
+            }
         }
 
-        // 色指定必要
-        private void makeBtn(Button btn, string name, string text, int height, int width, int x, int y, EventHandler e)
-        {
-            SuspendLayout();
-            //プロパティ設定
-            btn.Name = name;
-            btn.Text = text;
-            btn.Size = new Size(width, height);
-            btn.Location = new Point(x, y);
-            btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.MouseOverBackColor = Color.White;
-            btn.FlatAppearance.BorderSize = 0;
-            //イベントハンドラに関連付け
-            btn.Click += e;
-            //フォームにコントロールを追加
-            Controls.Add(btn);
-            ResumeLayout(false);
-        }
+        //private void chBoxUpdateOnActivated_Click(object sender, EventArgs e)
+        //{
+        //    updateOnActivated = ((CheckBox)sender).Checked;
+        //}
+
+        // プログラム終了
         private void btnClose_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void btnClose_Minimized(object sender, EventArgs e)
+        // フォームを最小化
+        private void btnMinimize_Click(object sender, EventArgs e)
         {
-            // フォームを最小化
             this.WindowState = FormWindowState.Minimized;
         }
 
@@ -269,100 +174,14 @@ namespace AutoJudge
             checkAll();
         }
 
-        private void makeInputTxtBox(int height, int width, int offset, int mergLeft, int mergUp)
-        {
-            txtbxInputs = new System.Windows.Forms.TextBox[testCaseNum];
-            SuspendLayout();
-            for (int i = 0; i < txtbxInputs.Length; i++)
-            {
-                //インスタンス作成
-                txtbxInputs[i] = new System.Windows.Forms.TextBox();
-                //プロパティ設定
-                txtbxInputs[i].Name = "Input" + problemStrs[i];
-                txtbxInputs[i].Text = "";
-                txtbxInputs[i].Size = new Size(width, height);
-                txtbxInputs[i].Location = new Point(mergLeft, i * height - i * offset + mergUp);
-                txtbxInputs[i].AcceptsReturn = true;
-                txtbxInputs[i].Multiline = true;
-                //イベントハンドラに関連付け
-                txtbxInputs[i].TextChanged += new EventHandler(txtbxInputs_Changed);
-                txtbxInputs[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
-                
-            }
-            //フォームにコントロールを追加
-            Controls.AddRange(txtbxInputs);
-            ResumeLayout(false);
-        }
-
-        private void makeAnswerTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputAnsMerge)
-        {
-            txtbxAnswers = new System.Windows.Forms.TextBox[testCaseNum];
-            SuspendLayout();
-            for (int i = 0; i < txtbxAnswers.Length; i++)
-            {
-                //インスタンス作成
-                txtbxAnswers[i] = new System.Windows.Forms.TextBox();
-                //プロパティ設定
-                txtbxAnswers[i].Name = "GroundTruth" + problemStrs[i];
-                txtbxAnswers[i].Text = "";
-                txtbxAnswers[i].Size = new Size(width, height);
-                txtbxAnswers[i].Location = new Point(mergLeft + width + inputAnsMerge, i * height - i * offset + mergUp);
-                txtbxAnswers[i].AcceptsReturn = true;
-                txtbxAnswers[i].Multiline = true;
-                //イベントハンドラに関連付け
-                txtbxAnswers[i].TextChanged += new EventHandler(txtbxAnswers_Changed);
-                txtbxAnswers[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
-            }
-            //フォームにコントロールを追加
-            Controls.AddRange(txtbxAnswers);
-            ResumeLayout(false);
-        }
-        private void makeSampleLable(int height, int x, int offset, int mergUp)
-        {
-            labelSample = new System.Windows.Forms.Label[testCaseNum];
-            SuspendLayout();
-            for (int i = 0; i < labelSample.Length; i++)
-            {
-                //インスタンス作成
-                labelSample[i] = new System.Windows.Forms.Label();
-                //プロパティ設定
-                labelSample[i].Name = "Sample" + problemStrs[i];
-                labelSample[i].Text = "";
-                labelSample[i].Location = new Point(x, i * height - i * offset + mergUp);
-                labelSample[i].AutoSize = true;
-            }
-            //フォームにコントロールを追加
-            Controls.AddRange(labelSample);
-            ResumeLayout(false);
-        }
-        private void makeCheckLable(int height, int x, int offset, int mergUp)
-        {
-            labelCheck = new System.Windows.Forms.Label[testCaseNum];
-            SuspendLayout();
-            for (int i = 0; i < labelCheck.Length; i++)
-            {
-                //インスタンス作成
-                labelCheck[i] = new System.Windows.Forms.Label();
-                //プロパティ設定
-                labelCheck[i].Name = "Check" + problemStrs[i];
-                labelCheck[i].Text = "";
-                labelCheck[i].Location = new Point(x, i * height - i * offset + mergUp);
-                labelCheck[i].AutoSize = true;
-                labelCheck[i].Font = new Font("Arial", 12, FontStyle.Bold);
-                labelCheck[i].ForeColor = Color.White;
-            }
-            //フォームにコントロールを追加
-            Controls.AddRange(labelCheck);
-            ResumeLayout(false);
-        }
         private void txtbxInputs_Changed(object sender, EventArgs e)
         {
             if (tabChanged)
                 tabChanged = false;
             else
             {
-                string txtboxText = ((System.Windows.Forms.TextBox)sender).Text;
-                string txtboxName = ((System.Windows.Forms.TextBox)sender).Name;
+                string txtboxText = ((TextBox)sender).Text;
+                string txtboxName = ((TextBox)sender).Name;
                 string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
                 int txtboxIDn = problemTable[txtboxIDs];
                 inputs[problemNowN, txtboxIDn] = txtboxText;
@@ -382,8 +201,8 @@ namespace AutoJudge
                 tabChanged = false;
             else
             {
-                string txtboxText = ((System.Windows.Forms.TextBox)sender).Text;
-                string txtboxName = ((System.Windows.Forms.TextBox)sender).Name;
+                string txtboxText = ((TextBox)sender).Text;
+                string txtboxName = ((TextBox)sender).Name;
                 string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
                 int txtboxIDn = problemTable[txtboxIDs];
                 groundTruth[problemNowN, txtboxIDn] = txtboxText;
@@ -396,7 +215,7 @@ namespace AutoJudge
         private void textBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.A)
-                ((System.Windows.Forms.TextBox)sender).SelectAll();
+                ((TextBox)sender).SelectAll();
         }
 
         // 出力が正しいかを判定して表示
