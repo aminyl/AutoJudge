@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace AutoJudge
 {
@@ -25,7 +15,6 @@ namespace AutoJudge
         private System.Windows.Forms.Label[] labelSample;
         private System.Windows.Forms.Label[] labelCheck;
         private System.Windows.Forms.Label labelBack;
-
 
         // マウスのクリック位置を記憶
         private Point mousePoint;

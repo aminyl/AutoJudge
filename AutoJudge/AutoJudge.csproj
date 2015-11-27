@@ -48,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="execute.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,7 +91,6 @@
   <ItemGroup>
     <Content Include="AutoJudge_s.ico" />
     <Content Include="ico.ico" />
-    <None Include="Resources\backgroundImage.bmp" />
     <Content Include="Resources\backgroundImage.png" />
     <Content Include="Resources\setting.png" />
     <Content Include="Resources\update.png" />

@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace AutoJudge
 {
@@ -23,20 +22,17 @@ namespace AutoJudge
         string[] problemStrs = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" }; // 実行ファイル名
         Dictionary<string, int> problemNums = new Dictionary<string, int>();
 
-        int problemNum = 8; // 問題がABCDだけならproblemNum = 4, 11以上はKLM...と追加が必要
+        int problemNum = 8; // 表示するタブ数, 11以上は problemStrs に追加が必要
         int testCaseNum = 5; // テストケースの数，変更可能
         string[,] inputs, groundTruth, samples, checks; // テキストを保持, [問題数, テストケース数]
 
-        int style = 1; // 0:タイトルバーあり 1:タイトルバーなし 2:タイトルバーな + サイズ変更可能
+        int style = 1; // 0:タイトルバーあり 1:タイトルバーなし 2:タイトルバーなし + サイズ変更可能
 
-        int problemNowN = 0; // 現在解いている問題
-        string problemNowS; // 現在解いている問題
+        int problemNowN = 0; // 現在開いているタブ
+        string problemNowS; // 現在開いているタブ
 
         bool tabChanged = false; // タブが変わった時にジャッジされないように
         bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
-
-        System.Diagnostics.Process p; // コマンドラインで実行
-        string result, command; // 実行結果, 入力
 
         public Form1()
         {
@@ -286,38 +282,6 @@ namespace AutoJudge
         {
             if (updateOnActivated)
                 exeAllcheckAll();
-        }
-
-        public void StartThread()
-        {
-            System.Threading.ThreadStart readThread = new System.Threading.ThreadStart(ReadThread);
-            System.Threading.ThreadStart writeThread = new System.Threading.ThreadStart(WriteThread);
-            System.Threading.Thread rThread = new System.Threading.Thread(readThread);
-            System.Threading.Thread wThread = new System.Threading.Thread(writeThread);
-            rThread.Name = "ReadThread";
-            wThread.Name = "WriteThread";
-            rThread.Start();       //starting the read thread
-            wThread.Start();       //starting the write thread
-            wThread.Join();
-            rThread.Join();
-        }
-
-        private void ReadThread()
-        {
-            result = p.StandardOutput.ReadToEnd();
-        }
-
-        private void WriteThread()
-        {
-            p.StandardInput.WriteLine(command);
-            p.StandardInput.WriteLine("exit");
-        }
-
-        private string startPSI(ProcessStartInfo psi)
-        {
-            Process p = Process.Start(psi); // アプリの実行開始
-            string output = p.StandardOutput.ReadToEnd(); // 標準出力の読み取り
-            return output.Replace("\r\r\n", "\n"); // 改行コードの修正
         }
     }
 }
