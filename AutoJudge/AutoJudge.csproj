@@ -92,7 +92,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AutoJudge_s.ico" />
     <Content Include="ico.ico" />
     <Content Include="Resources\backgroundImage.png" />
     <Content Include="Resources\setting.png" />

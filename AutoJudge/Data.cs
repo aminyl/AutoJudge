@@ -40,6 +40,9 @@ namespace AutoJudge
         // ファイルから読み出し
         private void loadFile()
         {
+            if (!File.Exists(fileName))
+                return;
+
             ArrayList ar = LoadFile(fileName);
 
             problemNowN = Math.Min(int.Parse((string)ar[saveIdxProblemNowN]), problemNum - 1);
