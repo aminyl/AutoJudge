@@ -18,7 +18,6 @@ namespace AutoJudge
     {
         private System.Windows.Forms.Button[] btnTabs;
         private System.Windows.Forms.Button btnUpdate;
-        //private System.Windows.Forms.CheckBox chBoxUpdateOnActivated;
         private System.Windows.Forms.Button btnMinimize;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.TextBox[] txtbxInputs;
@@ -41,10 +40,6 @@ namespace AutoJudge
             int updateBtnX = formSizeX - 4 * tabHeight, updateBtnY = tabMergUp;
             makeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
             makeUpdateBtn(updateBtnHeight, updateBtnWidth, updateBtnX, updateBtnY);
-
-            //int updateOnActivatedCheckBoxX = 450, updateOnActivatedCheckBoxY = 0;
-            //int updateOnActivatedCheckBoxHeight = 20, updateOnActivatedCheckBoxWidth = 20;
-            // makeUpdateOnActivatedCheckBox(updateOnActivatedCheckBoxWidth, updateOnActivatedCheckBoxHeight, updateOnActivatedCheckBoxX, updateOnActivatedCheckBoxY);
 
             if (style == 1 || style == 2)
             {
@@ -69,7 +64,7 @@ namespace AutoJudge
         private void makeBtn(Button btn, string name, string text, int height, int width, int x, int y, EventHandler e)
         {
             SuspendLayout();
-            //プロパティ設定
+            // プロパティ設定
             btn.Name = name;
             btn.Text = text;
             btn.Size = new Size(width, height);
@@ -78,9 +73,9 @@ namespace AutoJudge
             btn.BackColor = Color.Transparent;
             btn.FlatAppearance.MouseOverBackColor = Color.White;
             btn.FlatAppearance.BorderSize = 0;
-            //イベントハンドラに関連付け
+            // イベントハンドラに関連付け
             btn.Click += e;
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.Add(btn);
             ResumeLayout(false);
         }
@@ -95,7 +90,7 @@ namespace AutoJudge
                 int y = mergUp;
                 makeBtn(btnTabs[i], "btnTab" + problemStrs[i], problemStrs[i], height, width, x, y, new EventHandler(btnTabs_Click));
             }
-            btnTabs[0].BackColor = Color.White;
+            btnTabs[problemNowN].BackColor = Color.White;
         }
 
         private void makeCloseBtn(int height, int width, int x, int y)
@@ -114,18 +109,17 @@ namespace AutoJudge
         {
             btnUpdate = new System.Windows.Forms.Button();
             SuspendLayout();
-            //プロパティ設定
-            btnUpdate.Name = "btnExeAll";
-            btnUpdate.Text = "";
+            // プロパティ設定
+            btnUpdate.Name = "btnUpdate";
             btnUpdate.Size = new Size(width, height);
             btnUpdate.Location = new Point(x, y);
             btnUpdate.FlatStyle = FlatStyle.Flat;
             btnUpdate.FlatAppearance.BorderSize = 0;
             btnUpdate.FlatAppearance.MouseDownBackColor = Color.Gray;
             btnUpdate.BackgroundImageLayout = ImageLayout.Zoom;
-            //イベントハンドラに関連付け
+            // イベントハンドラに関連付け
             btnUpdate.MouseUp += new MouseEventHandler(btnUpdate_MouseUp);
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.Add(btnUpdate);
             setUpdateBtn(1);
             ResumeLayout(false);
@@ -151,50 +145,27 @@ namespace AutoJudge
             }
         }
 
-        //private void makeUpdateOnActivatedCheckBox(int height, int width, int x, int y)
-        //{
-        //    chBoxUpdateOnActivated = new System.Windows.Forms.CheckBox();
-        //    SuspendLayout();
-        //    //プロパティ設定
-        //    chBoxUpdateOnActivated.Name = "chBoxUpdateOnActivated";
-        //    chBoxUpdateOnActivated.AutoSize = false;
-        //    chBoxUpdateOnActivated.Size = new Size(width, height);
-        //    chBoxUpdateOnActivated.Location = new Point(x, y);
-        //    chBoxUpdateOnActivated.FlatStyle = FlatStyle.Flat;
-        //    chBoxUpdateOnActivated.BackColor = Color.Transparent;
-        //    chBoxUpdateOnActivated.FlatAppearance.CheckedBackColor = Color.Gray;
-        //    chBoxUpdateOnActivated.FlatAppearance.BorderSize = 0;
-        //    chBoxUpdateOnActivated.FlatAppearance.BorderColor = Color.Gray;
-        //    chBoxUpdateOnActivated.Appearance = Appearance.Button;
-        //    chBoxUpdateOnActivated.CheckState = CheckState.Checked;
-        //    //イベントハンドラに関連付け
-        //    chBoxUpdateOnActivated.Click += new EventHandler(chBoxUpdateOnActivated_Click);
-        //    //フォームにコントロールを追加
-        //    Controls.Add(chBoxUpdateOnActivated);
-        //    ResumeLayout(false);
-        //}
-
         private void makeInputTxtBox(int height, int width, int offset, int mergLeft, int mergUp)
         {
             txtbxInputs = new System.Windows.Forms.TextBox[testCaseNum];
             SuspendLayout();
             for (int i = 0; i < txtbxInputs.Length; i++)
             {
-                //インスタンス作成
+                // インスタンス作成
                 txtbxInputs[i] = new System.Windows.Forms.TextBox();
-                //プロパティ設定
+                // プロパティ設定
                 txtbxInputs[i].Name = "Input" + problemStrs[i];
                 txtbxInputs[i].Text = "";
                 txtbxInputs[i].Size = new Size(width, height);
                 txtbxInputs[i].Location = new Point(mergLeft, i * height - i * offset + mergUp);
                 txtbxInputs[i].AcceptsReturn = true;
                 txtbxInputs[i].Multiline = true;
-                //イベントハンドラに関連付け
+                // イベントハンドラに関連付け
                 txtbxInputs[i].TextChanged += new EventHandler(txtbxInputs_Changed);
                 txtbxInputs[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
 
             }
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.AddRange(txtbxInputs);
             ResumeLayout(false);
         }
@@ -205,16 +176,16 @@ namespace AutoJudge
             SuspendLayout();
             for (int i = 0; i < txtbxAnswers.Length; i++)
             {
-                //インスタンス作成
+                // インスタンス作成
                 txtbxAnswers[i] = new System.Windows.Forms.TextBox();
-                //プロパティ設定
+                // プロパティ設定
                 txtbxAnswers[i].Name = "GroundTruth" + problemStrs[i];
                 txtbxAnswers[i].Text = "";
                 txtbxAnswers[i].Size = new Size(width, height);
                 txtbxAnswers[i].Location = new Point(mergLeft + width + inputAnsMerge, i * height - i * offset + mergUp);
                 txtbxAnswers[i].AcceptsReturn = true;
                 txtbxAnswers[i].Multiline = true;
-                //イベントハンドラに関連付け
+                // イベントハンドラに関連付け
                 txtbxAnswers[i].TextChanged += new EventHandler(txtbxAnswers_Changed);
                 txtbxAnswers[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
             }
@@ -229,16 +200,16 @@ namespace AutoJudge
             SuspendLayout();
             for (int i = 0; i < labelSample.Length; i++)
             {
-                //インスタンス作成
+                // インスタンス作成
                 labelSample[i] = new System.Windows.Forms.Label();
-                //プロパティ設定
+                // プロパティ設定
                 labelSample[i].Name = "Sample" + problemStrs[i];
                 labelSample[i].Text = "";
                 labelSample[i].Location = new Point(x, i * height - i * offset + mergUp);
                 labelSample[i].AutoSize = true;
                 labelSample[i].BackColor = Color.Transparent;
             }
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.AddRange(labelSample);
             ResumeLayout(false);
         }
@@ -249,18 +220,18 @@ namespace AutoJudge
             SuspendLayout();
             for (int i = 0; i < labelCheck.Length; i++)
             {
-                //インスタンス作成
+                // インスタンス作成
                 labelCheck[i] = new System.Windows.Forms.Label();
-                //プロパティ設定
+                // プロパティ設定
                 labelCheck[i].Name = "Check" + problemStrs[i];
                 labelCheck[i].Text = "";
                 labelCheck[i].Location = new Point(x, i * height - i * offset + mergUp);
                 labelCheck[i].AutoSize = true;
                 labelCheck[i].Font = new Font("Arial", 12, FontStyle.Bold);
                 labelCheck[i].ForeColor = Color.White;
-                //labelCheck[i].BackColor = Color.Transparent;
+                // labelCheck[i].BackColor = Color.Transparent;
             }
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.AddRange(labelCheck);
             ResumeLayout(false);
         }
@@ -300,14 +271,14 @@ namespace AutoJudge
         {
             Image backImage = setBackgroundImage(img);
             SuspendLayout();
-            //インスタンス作成
+            // インスタンス作成
             labelBack = new Label();
-            //プロパティ設定
+            // プロパティ設定
             labelBack.Name = "backgroundLabel";
             labelBack.Location = new Point(x, y);
             labelBack.Size = new Size(backImage.Width, backImage.Height);
             labelBack.AutoSize = false;
-            //フォームにコントロールを追加
+            // フォームにコントロールを追加
             Controls.Add(labelBack);
             ResumeLayout(false);
 
