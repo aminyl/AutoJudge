@@ -49,6 +49,7 @@ namespace AutoJudge
             }
 
             init();
+            loadFile();
         }
 
         private void init()
@@ -58,7 +59,7 @@ namespace AutoJudge
                 problemNums[problemStrs[i]] = i;
             problemNowS = problemStrs[problemNowN];
 
-            inputs = new string[problemStrs.Length, testCaseNum];
+            inputs = new string[problemNum, testCaseNum];
             groundTruth = new string[problemNum, testCaseNum];
             samples = new string[problemNum, testCaseNum];
             checks = new string[problemNum, testCaseNum];
@@ -94,6 +95,11 @@ namespace AutoJudge
             problemNowN = problemNums[btnID];
             problemNowS = btnID;
 
+            loadDataToTab();
+        }
+
+        private void loadDataToTab()
+        {
             for (int i = 0; i < testCaseNum; i++)
             {
                 // タブが変わった時にジャッジされないように TODO:他の方法で
@@ -111,7 +117,7 @@ namespace AutoJudge
             // 選択されているタブの色を白色に
             for (int i = 0; i < problemNum; i++)
                 btnTabs[i].BackColor = Color.Transparent;
-            ((Button)sender).BackColor = Color.White;
+            btnTabs[problemNowN].BackColor = Color.White;
         }
 
         private void btnExeAll_Click(object sender, EventArgs e)
@@ -131,12 +137,15 @@ namespace AutoJudge
             {
                 updateOnActivated = !updateOnActivated;
                 setUpdateBtn(updateOnActivated ? 1 : 0);
+                //loadFile();
             }
+
         }
 
         // プログラム終了
         private void btnClose_Click(object sender, EventArgs e)
         {
+            saveFile();
             Close();
         }
 
