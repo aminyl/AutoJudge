@@ -11,7 +11,7 @@ namespace AutoJudge
 
     public partial class Form1 : Form
     {
-        private string fileName = "TestCases.txt";
+        private string saveFileName = "TestCases.txt";
         private int saveIdxProblemNum = 0, saveIdxTestCaseNum = 1, saveIdxProblemNowN = 2, saveIdxTestCaseStartPoint = 3;
 
         // ファイルへ保存
@@ -34,16 +34,16 @@ namespace AutoJudge
                     ar.Add(checks[i, j]);
                 }
             }
-            SaveFile(ar, fileName);
+            SaveFile(ar, saveFileName);
         }
 
         // ファイルから読み出し
         private void loadFile()
         {
-            if (!File.Exists(fileName))
+            if (!File.Exists(saveFileName))
                 return;
 
-            ArrayList ar = LoadFile(fileName);
+            ArrayList ar = LoadFile(saveFileName);
 
             problemNowN = Math.Min(int.Parse((string)ar[saveIdxProblemNowN]), problemNum - 1);
             problemNowS = problemStrs[problemNowN];

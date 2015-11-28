@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace AutoJudge
@@ -8,19 +9,72 @@ namespace AutoJudge
     {
         System.Diagnostics.Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
+        Thread rThread;
+
+        int timeLimit = 2000;
+
+        // filename:プログラムファイル名, input:入力
+        private string excute(string filename, string input)
+        {
+            p = new System.Diagnostics.Process();
+            p.StartInfo.FileName = "ruby.exe";
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.Arguments = answerFilePath + filename + fileType;
+            // cmd.exe を起動
+            p.Start();
+            // cmd.exe で実行するコマンドを取得
+            command = input;
+            // 標準入出力からリードライトするためのスレッドを起動
+            //startExeThread();
+            StartThread();
+            Console.WriteLine("start excute");
+            // cmd.exe が終了するのを2000msec待つ
+            p.WaitForExit(2000);
+            if (!p.HasExited)
+            {
+                Console.WriteLine("TLE");
+                p.Kill();
+                p.WaitForExit(timeLimit);
+                Console.WriteLine(filename);
+                errorFlag = TLE;
+            }
+            else
+            {
+                Console.WriteLine("no error");
+                errorFlag = "";
+            }
+            Console.WriteLine("end excute");
+            return result;
+        }
 
         public void StartThread()
         {
-            System.Threading.ThreadStart readThread = new System.Threading.ThreadStart(ReadThread);
-            System.Threading.ThreadStart writeThread = new System.Threading.ThreadStart(WriteThread);
-            System.Threading.Thread rThread = new System.Threading.Thread(readThread);
-            System.Threading.Thread wThread = new System.Threading.Thread(writeThread);
+            ThreadStart readThread = new ThreadStart(ReadThread);
+            ThreadStart writeThread = new ThreadStart(WriteThread);
+            rThread = new Thread(readThread);
+            Thread wThread = new Thread(writeThread);
             rThread.Name = "ReadThread";
             wThread.Name = "WriteThread";
             rThread.Start();       //starting the read thread
             wThread.Start();       //starting the write thread
             wThread.Join();
+
+            // for long process
+            Console.WriteLine("Start joinThread");
+            Thread t = new Thread(new ThreadStart(joinThread));
+            t.IsBackground = true;
+            t.Start();
+            Console.WriteLine("end StartThread");
+        }
+
+        private void joinThread()
+        {
+            Console.WriteLine("enter join thread");
             rThread.Join();
+            Console.WriteLine("end join thread");
         }
 
         private void ReadThread()

@@ -25,6 +25,9 @@ namespace AutoJudge
         int problemNum = 8; // 表示するタブ数, 11以上は problemStrs に追加が必要
         int testCaseNum = 5; // テストケースの数，変更可能
         string[,] inputs, groundTruth, samples, checks; // テキストを保持, [問題数, テストケース数]
+        string[,] errors; // エラーを保持, 今のところTLEのみ
+        string errorFlag; // エラーを保持, 今のところTLEのみ
+        string NONE = "", AC = "AC", WA = "WA", TLE = "TLE";
 
         int style = 1; // 0:タイトルバーあり 1:タイトルバーなし 2:タイトルバーなし + サイズ変更可能
 
@@ -34,9 +37,12 @@ namespace AutoJudge
         bool tabChanged = false; // タブが変わった時にジャッジされないように
         bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
 
+        bool onStart; // 起動したときにジャッジされないように
+
         public Form1()
         {
             InitializeComponent();
+            onStart = true;
 
             if (style == 1) // タイトルバーをなくす
             {
@@ -50,11 +56,13 @@ namespace AutoJudge
 
             init();
             loadFile();
+
+            // このForm1()が終わった後に1度Form1_Activated()が呼ばれる
+            if (!updateOnActivated) onStart = false;
         }
 
         private void init()
         {
-            System.Console.WriteLine(problemStrs.Length);
             for (int i = 0; i < problemStrs.Length; i++)
                 problemNums[problemStrs[i]] = i;
             problemNowS = problemStrs[problemNowN];
@@ -63,6 +71,7 @@ namespace AutoJudge
             groundTruth = new string[problemNum, testCaseNum];
             samples = new string[problemNum, testCaseNum];
             checks = new string[problemNum, testCaseNum];
+            errors = new string[problemNum, testCaseNum];
 
             makeControlls();
         }
@@ -90,26 +99,31 @@ namespace AutoJudge
 
         private void btnTabs_Click(object sender, EventArgs e)
         {
-            string btnName = ((Button)sender).Name;
-            string btnID = btnName.Substring(btnName.Length - 1);
-            problemNowN = problemNums[btnID];
-            problemNowS = btnID;
+            Console.WriteLine("tab clicked");
 
+            string btnName = ((Button)sender).Name;
+            string btnIDS = btnName.Substring(btnName.Length - 1);
+            int btnIDN = problemNums[btnIDS];
+
+            if (problemNowN == btnIDN)
+                return;
+
+            Console.WriteLine("tab changed");
+
+            changeProblemNowTo(btnIDN);
+            // タブが変わった時にジャッジされないように
+            tabChanged = true;
             loadDataToTab();
+            tabChanged = false;
         }
 
         private void loadDataToTab()
         {
             for (int i = 0; i < testCaseNum; i++)
             {
-                // タブが変わった時にジャッジされないように TODO:他の方法で
-                tabChanged = true;
                 txtbxInputs[i].Text = inputs[problemNowN, i];
-                tabChanged = true;
                 txtbxAnswers[i].Text = groundTruth[problemNowN, i];
-                tabChanged = true;
                 labelSample[i].Text = samples[problemNowN, i];
-                tabChanged = true;
                 labelCheck[i].Text = checks[problemNowN, i];
             }
             checkAll(); // 色情報は保持していないので再チェック
@@ -118,6 +132,18 @@ namespace AutoJudge
             for (int i = 0; i < problemNum; i++)
                 btnTabs[i].BackColor = Color.Transparent;
             btnTabs[problemNowN].BackColor = Color.White;
+        }
+
+        private void changeProblemNowTo(int i)
+        {
+            problemNowN = i;
+            problemNowS = problemStrs[i];
+        }
+
+        private void changeProblemNowTo(string s)
+        {
+            problemNowN = problemNums[s];
+            problemNowS = s;
         }
 
         private void btnExeAll_Click(object sender, EventArgs e)
@@ -139,7 +165,6 @@ namespace AutoJudge
                 setUpdateBtn(updateOnActivated ? 1 : 0);
                 //loadFile();
             }
-
         }
 
         // プログラム終了
@@ -175,41 +200,50 @@ namespace AutoJudge
 
         private void txtbxInputs_Changed(object sender, EventArgs e)
         {
-            if (tabChanged)
-                tabChanged = false;
-            else
-            {
-                string txtboxText = ((TextBox)sender).Text;
-                string txtboxName = ((TextBox)sender).Name;
-                string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
-                int txtboxIDn = problemNums[txtboxIDs];
-                inputs[problemNowN, txtboxIDn] = txtboxText;
+            if (tabChanged || onStart)
+                return;
 
-                // 入力された文字列を渡して実行
-                string tmpres = excute_byIDn(txtboxIDn);
-                // 表示と保存
-                samples[problemNowN, txtboxIDn] = (labelSample[txtboxIDn].Text = tmpres);
+            Console.WriteLine("inputs changed");
+            string txtboxText = ((TextBox)sender).Text;
+            string txtboxName = ((TextBox)sender).Name;
+            string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
+            int txtboxIDn = problemNums[txtboxIDs];
+            saveInputToArray(txtboxIDn);
 
-                // 答え合わせ
-                checkAns(txtboxIDn);
-            }
+            // 入力された文字列を渡して実行
+            Console.WriteLine("excute txtboxId : " + txtboxIDn);
+            string tmpres = excute_byIDn(txtboxIDn);
+            // 表示と保存
+            samples[problemNowN, txtboxIDn] = (labelSample[txtboxIDn].Text = tmpres);
+
+            // 答え合わせ
+            checkAns(txtboxIDn);
         }
 
         private void txtbxAnswers_Changed(object sender, EventArgs e)
         {
-            if (tabChanged)
-                tabChanged = false;
-            else
-            {
-                string txtboxText = ((TextBox)sender).Text;
-                string txtboxName = ((TextBox)sender).Name;
-                string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
-                int txtboxIDn = problemNums[txtboxIDs];
-                groundTruth[problemNowN, txtboxIDn] = txtboxText;
+            if (tabChanged || onStart)
+                return;
 
-                // 答え合わせ
-                checkAns(txtboxIDn);
-            }
+            Console.WriteLine("answers changed");
+            string txtboxText = ((TextBox)sender).Text;
+            string txtboxName = ((TextBox)sender).Name;
+            string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
+            int txtboxIDn = problemNums[txtboxIDs];
+            saveGTToArray(txtboxIDn);
+
+            // 答え合わせ
+            checkAns(txtboxIDn);
+        }
+
+        private void saveInputToArray(int id)
+        {
+            inputs[problemNowN, id] = txtbxInputs[id].Text;
+        }
+
+        private void saveGTToArray(int id)
+        {
+            groundTruth[problemNowN, id] = txtbxAnswers[id].Text;
         }
 
         // Ctr + A で全選択
@@ -230,15 +264,24 @@ namespace AutoJudge
                 res = "";
                 labelCheck[id].BackColor = Color.Transparent; // 無くてもいい
             }
-            else if (gt == smp)
+            else if (!(errors[problemNowN, id] == NONE || errors[problemNowN, id] == null))
             {
-                res = "AC";
-                labelCheck[id].BackColor = Color.Green;
+                Console.WriteLine("error name : " + errors[problemNowN, id]);
+                res = errors[problemNowN, id];
+                labelCheck[id].BackColor = Color.Orange;
             }
             else
             {
-                res = "WA";
-                labelCheck[id].BackColor = Color.Orange;
+                if (gt == smp)
+                {
+                    res = AC;
+                    labelCheck[id].BackColor = Color.Green;
+                }
+                else
+                {
+                    res = WA;
+                    labelCheck[id].BackColor = Color.Orange;
+                }
             }
             checks[problemNowN, id] = (labelCheck[id].Text = res);
         }
@@ -250,28 +293,17 @@ namespace AutoJudge
             string input = txtbxInputs[idn].Text;
             string gt = txtbxAnswers[idn].Text;
             if (input == "" && gt == "") return ""; // 何も入力されていない場合は実行しない
-            return excute(ID, input);
+            string res = excute(ID, input);
+            if (errorFlag != "")
+                setError(idn);
+            return res;
         }
 
-        // filename:プログラムファイル名, input:入力
-        private string excute(string filename, string input)
+        private void setError(int id)
         {
-            p = new System.Diagnostics.Process();
-            p.StartInfo.FileName = "ruby.exe";
-            p.StartInfo.CreateNoWindow = true;
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardInput = true;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.Arguments = answerFilePath + filename + fileType;
-            // cmd.exe を起動
-            p.Start();
-            // cmd.exe で実行するコマンドを取得
-            command = input;
-            // 標準入出力からリードライトするためのスレッドを起動
-            StartThread();
-            // cmd.exe が終了するのを待つ
-            p.WaitForExit();
-            return result;
+            Console.WriteLine("setting error " + problemNowN + " " + id + " " + id + " ");
+            errors[problemNowN, id] = errorFlag;
+            errorFlag = "";
         }
 
         // ダブルクリックした時にジャッジ
@@ -290,7 +322,12 @@ namespace AutoJudge
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (updateOnActivated)
-                exeAllcheckAll();
+            {
+                if (onStart)
+                    onStart = false;
+                else
+                    exeAllcheckAll();
+            }
         }
     }
 }
