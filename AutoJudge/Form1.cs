@@ -155,7 +155,8 @@ namespace AutoJudge
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (!updateOnActivated) {
+                if (!updateOnActivated)
+                {
                     exeAllcheckAll();
                 }
             }
@@ -294,8 +295,7 @@ namespace AutoJudge
             string gt = txtbxAnswers[idn].Text;
             if (input == "" && gt == "") return ""; // 何も入力されていない場合は実行しない
             string res = excute(ID, input);
-            if (errorFlag != "")
-                setError(idn);
+            setError(idn);
             return res;
         }
 
