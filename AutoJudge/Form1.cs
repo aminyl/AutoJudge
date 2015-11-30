@@ -53,6 +53,12 @@ namespace AutoJudge
                 this.ControlBox = false;
                 this.Text = "";
             }
+            else if (style == 3) // style 1 で最小化の挙動が気になるとき
+            {
+                this.FormBorderStyle = FormBorderStyle.FixedSingle;
+                this.ControlBox = false;
+                this.Text = "";
+            }
 
             init();
             loadFile();
@@ -92,6 +98,9 @@ namespace AutoJudge
             if (style == 0) return;
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left)
             {
+                // 最大化されたときにドラッグで元に戻す
+                if (WindowState == FormWindowState.Maximized && mousePoint.Y < 20)
+                    WindowState = FormWindowState.Normal;
                 this.Left += e.X - mousePoint.X;
                 this.Top += e.Y - mousePoint.Y;
             }
@@ -178,7 +187,33 @@ namespace AutoJudge
         // フォームを最小化
         private void btnMinimize_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            switch (WindowState)
+            {
+                case FormWindowState.Maximized:
+                    this.WindowState = FormWindowState.Normal;
+                    break;
+                default:
+                    this.WindowState = FormWindowState.Minimized;
+                    break;
+            }
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("form size changed");
+            if (!onStart)
+            {
+                switch (WindowState)
+                {
+                    case FormWindowState.Maximized:
+                        btnMinimize.Text = "□";
+                        break;
+                    default:
+                        btnMinimize.Text = "-";
+                        break;
+                }
+
+            }
         }
 
         private void exeAll()

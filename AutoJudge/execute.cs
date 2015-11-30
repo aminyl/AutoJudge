@@ -7,11 +7,11 @@ namespace AutoJudge
 {
     public partial class Form1 : Form
     {
+        int timeLimit = 2000; // TLEまでの時間,プログラム実行中,最大この時間UIがフリーズする
+
         System.Diagnostics.Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
         Thread rThread;
-
-        int timeLimit = 2000;
 
         // filename:プログラムファイル名, input:入力
         private string excute(string filename, string input)
@@ -33,11 +33,12 @@ namespace AutoJudge
             Console.WriteLine("start excute");
             // cmd.exe が終了するのを2000msec待つ
             p.WaitForExit(2000);
+            // 終了していなければTLEとする
             if (!p.HasExited)
             {
                 Console.WriteLine("TLE");
-                p.Kill();
-                p.WaitForExit(timeLimit);
+                p.Kill(); // 終了させる
+                p.WaitForExit(timeLimit); // 終了するまで待つ(数msecかかる)
                 Console.WriteLine(filename);
                 errorFlag = TLE;
             }

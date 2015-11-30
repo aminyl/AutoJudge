@@ -16,7 +16,7 @@ namespace AutoJudge
         private System.Windows.Forms.Label[] labelCheck;
         private System.Windows.Forms.Label labelBack;
 
-        // マウスのクリック位置を記憶
+        // ウィンドウ移動のためにマウスのクリック位置を記憶
         private Point mousePoint;
 
         private void makeControlls()
@@ -24,13 +24,16 @@ namespace AutoJudge
             int formSizeX = 560, formSizeY = 480;
             // フォームのサイズ変更
             ClientSize = new System.Drawing.Size(formSizeX, formSizeY);
+            // サイズ変更の検知
+            this.SizeChanged += new EventHandler(Form1_SizeChanged);
+
             int tabHeight = 23, tabWidth = 48, tabOffset = 1, tabMergLeft = 0, tabMergUp = 0;
             int updateBtnHeight = tabHeight, updateBtnWidth = tabHeight;
             int updateBtnX = formSizeX - 4 * tabHeight, updateBtnY = tabMergUp;
             makeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
             makeUpdateBtn(updateBtnHeight, updateBtnWidth, updateBtnX, updateBtnY);
 
-            if (style == 1 || style == 2)
+            if (style != 0)
             {
                 makeCloseBtn(tabHeight, tabHeight, formSizeX - tabHeight, 0);
                 makeMinimizeBtn(tabHeight, tabHeight, formSizeX - 2 * tabHeight, 0);
@@ -46,7 +49,7 @@ namespace AutoJudge
             makeCheckLable(txtbxHeight, checkLblX, txtbxOffset, txtbxMergUp);
 
             // 背景の描画, コントロールの重なり順の制御が分からないので最後に書く
-            // setBackgroundImage(Properties.Resources.backgroundImage);
+            //setBackgroundImage(Properties.Resources.backgroundImage);
         }
 
         // 色指定必要
