@@ -1,70 +1,89 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 namespace AutoJudge
 {
+    public class DoubleClickButton : Button
+    {
+        public DoubleClickButton() : base()
+        {
+            SetStyle(ControlStyles.StandardClick | ControlStyles.StandardDoubleClick, true);
+        }
+    }
+
     public partial class Form1 : Form
     {
-        private System.Windows.Forms.Button[] btnTabs;
-        private System.Windows.Forms.Button btnUpdate;
-        private System.Windows.Forms.Button btnMinimize;
-        private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.TextBox[] txtbxInputs;
-        private System.Windows.Forms.TextBox[] txtbxAnswers;
-        private System.Windows.Forms.Label[] labelSample;
-        private System.Windows.Forms.Label[] labelCheck;
-        private System.Windows.Forms.Label labelBack;
+        private Button[] btnTabs;
+        private Button btnUpdate;
+        private DoubleClickButton btnRefresh;
+        private Button btnMinimize;
+        private Button btnClose;
+        private TextBox[] txtbxInputs;
+        private TextBox[] txtbxAnswers;
+        private Label[] labelSample;
+        private Label[] labelCheck;
+        private Label labelBack;
 
         // ウィンドウ移動のためにマウスのクリック位置を記憶
         private Point mousePoint;
 
-        private void makeControlls()
+        private void MakeControlls()
         {
             int formSizeX = 560, formSizeY = 480;
             // フォームのサイズ変更
-            ClientSize = new System.Drawing.Size(formSizeX, formSizeY);
+            ClientSize = new Size(formSizeX, formSizeY);
+            MaximizeBox = false;
+
             // サイズ変更の検知
-            this.SizeChanged += new EventHandler(Form1_SizeChanged);
+            SizeChanged += new EventHandler(Form1_SizeChanged);
 
             int tabHeight = 23, tabWidth = 48, tabOffset = 1, tabMergLeft = 0, tabMergUp = 0;
             int updateBtnHeight = tabHeight, updateBtnWidth = tabHeight;
             int updateBtnX = formSizeX - 4 * tabHeight, updateBtnY = tabMergUp;
-            makeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
-            makeUpdateBtn(updateBtnHeight, updateBtnWidth, updateBtnX, updateBtnY);
+            MakeTabBtn(tabHeight, tabWidth, tabOffset, tabMergLeft, tabMergUp);
+            MakeUpdateBtn(updateBtnHeight, updateBtnWidth, updateBtnX, updateBtnY);
+            MakeRefreshBtn(updateBtnHeight, updateBtnWidth, updateBtnX - updateBtnWidth, updateBtnY);
 
             if (style != 0)
             {
-                makeCloseBtn(tabHeight, tabHeight, formSizeX - tabHeight, 0);
-                makeMinimizeBtn(tabHeight, tabHeight, formSizeX - 2 * tabHeight, 0);
+                MakeCloseBtn(tabHeight, tabHeight, formSizeX - tabHeight, 0);
+                MakeMinimizeBtn(tabHeight, tabHeight, formSizeX - 2 * tabHeight, 0);
             }
 
             int txtbxHeight = 80, txtbxWidth = (int)(txtbxHeight * 1.618), txtbxOffset = 1, txtbxMergLeft = 5, txtbxMergUp = 50;
             int inputAnsMerge = 10;
             int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputAnsMerge;
             int checkLblX = txtbxMergLeft + 3 * txtbxWidth + inputAnsMerge;
-            makeInputTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp);
-            makeAnswerTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp, inputAnsMerge);
-            makeSampleLable(txtbxHeight, sampleLblX, txtbxOffset, txtbxMergUp);
-            makeCheckLable(txtbxHeight, checkLblX, txtbxOffset, txtbxMergUp);
+            MakeInputTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp);
+            MakeAnswerTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp, inputAnsMerge);
+            MakeSampleLable(txtbxHeight, sampleLblX, txtbxOffset, txtbxMergUp);
+            MakeCheckLable(txtbxHeight, checkLblX, txtbxOffset, txtbxMergUp);
 
             // 背景の描画, コントロールの重なり順の制御が分からないので最後に書く
-            //setBackgroundImage(Properties.Resources.backgroundImage);
+            SetBackgroundImage();
         }
 
-        // 色指定必要
-        private void makeBtn(Button btn, string name, string text, int height, int width, int x, int y, EventHandler e)
+        private void MakeBtn(Button btn, string name, int height, int width, int x, int y)
         {
-            SuspendLayout();
-            // プロパティ設定
             btn.Name = name;
-            btn.Text = text;
             btn.Size = new Size(width, height);
             btn.Location = new Point(x, y);
             btn.FlatStyle = FlatStyle.Flat;
             btn.BackColor = Color.Transparent;
             btn.FlatAppearance.MouseOverBackColor = Color.White;
             btn.FlatAppearance.BorderSize = 0;
+        }
+
+        // 色指定必要
+        private void MakeBtn(Button btn, string name, string text, int height, int width, int x, int y, EventHandler e)
+        {
+            SuspendLayout();
+            MakeBtn(btn, name, height, width, x, y);
+            // プロパティ設定
+            btn.Text = text;
             // イベントハンドラに関連付け
             btn.Click += e;
             // フォームにコントロールを追加
@@ -72,53 +91,47 @@ namespace AutoJudge
             ResumeLayout(false);
         }
 
-        private void makeTabBtn(int height, int width, int offset, int mergLeft, int mergUp)
+        private void MakeTabBtn(int height, int width, int offset, int mergLeft, int mergUp)
         {
-            btnTabs = new System.Windows.Forms.Button[problemNum];
+            btnTabs = new Button[problemNum];
             for (int i = 0; i < btnTabs.Length; i++)
             {
-                btnTabs[i] = new System.Windows.Forms.Button();
+                btnTabs[i] = new Button();
                 int x = i * width - i * offset + mergLeft;
                 int y = mergUp;
-                makeBtn(btnTabs[i], "btnTab" + problemStrs[i], problemStrs[i], height, width, x, y, new EventHandler(btnTabs_Click));
+                MakeBtn(btnTabs[i], "btnTab" + problemStrs[i], problemStrs[i], height, width, x, y, new EventHandler(BtnTabs_Click));
             }
             btnTabs[problemNowN].BackColor = Color.White;
         }
 
-        private void makeCloseBtn(int height, int width, int x, int y)
+        private void MakeCloseBtn(int height, int width, int x, int y)
         {
-            btnClose = new System.Windows.Forms.Button();
-            makeBtn(btnClose, "btnCloase", "X", height, width, x, y, new EventHandler(btnClose_Click));
+            btnClose = new Button();
+            MakeBtn(btnClose, "btnCloase", "X", height, width, x, y, new EventHandler(BtnClose_Click));
         }
 
-        private void makeMinimizeBtn(int height, int width, int x, int y)
+        private void MakeMinimizeBtn(int height, int width, int x, int y)
         {
-            btnMinimize = new System.Windows.Forms.Button();
-            makeBtn(btnMinimize, "btnMinimize", "-", height, width, x, y, new EventHandler(btnMinimize_Click));
+            btnMinimize = new Button();
+            MakeBtn(btnMinimize, "btnMinimize", "-", height, width, x, y, new EventHandler(BtnMinimize_Click));
         }
 
-        private void makeUpdateBtn(int height, int width, int x, int y)
+        private void MakeUpdateBtn(int height, int width, int x, int y)
         {
-            btnUpdate = new System.Windows.Forms.Button();
             SuspendLayout();
-            // プロパティ設定
-            btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(width, height);
-            btnUpdate.Location = new Point(x, y);
-            btnUpdate.FlatStyle = FlatStyle.Flat;
-            btnUpdate.FlatAppearance.BorderSize = 0;
-            btnUpdate.FlatAppearance.MouseDownBackColor = Color.Gray;
+            btnUpdate = new Button();
+            MakeBtn(btnUpdate, "btnUpdate", height, width, x, y);
             btnUpdate.BackgroundImageLayout = ImageLayout.Zoom;
             // イベントハンドラに関連付け
-            btnUpdate.MouseUp += new MouseEventHandler(btnUpdate_MouseUp);
+            btnUpdate.MouseUp += new MouseEventHandler(BtnUpdate_MouseUp);
             // フォームにコントロールを追加
             Controls.Add(btnUpdate);
-            setUpdateBtn(1);
+            SetUpdateBtn(1);
             ResumeLayout(false);
         }
 
         // アップデートボタンの二つのモード
-        private void setUpdateBtn(int mode)
+        private void SetUpdateBtn(int mode)
         {
             switch (mode)
             {
@@ -137,14 +150,28 @@ namespace AutoJudge
             }
         }
 
-        private void makeInputTxtBox(int height, int width, int offset, int mergLeft, int mergUp)
+        private void MakeRefreshBtn(int height, int width, int x, int y)
         {
-            txtbxInputs = new System.Windows.Forms.TextBox[testCaseNum];
+            SuspendLayout();
+            btnRefresh = new DoubleClickButton();
+            MakeBtn(btnRefresh, "btnClear", height, width, x, y);
+            btnRefresh.BackgroundImageLayout = ImageLayout.Zoom;
+            btnRefresh.BackgroundImage = Properties.Resources.refresh; // http://icooon-mono.com/
+            // イベントハンドラに関連付け
+            btnRefresh.DoubleClick += new EventHandler(BtnRefresh_DoubleClick);
+            // フォームにコントロールを追加
+            Controls.Add(btnRefresh);
+            ResumeLayout(false);
+        }
+
+        private void MakeInputTxtBox(int height, int width, int offset, int mergLeft, int mergUp)
+        {
+            txtbxInputs = new TextBox[testCaseNum];
             SuspendLayout();
             for (int i = 0; i < txtbxInputs.Length; i++)
             {
                 // インスタンス作成
-                txtbxInputs[i] = new System.Windows.Forms.TextBox();
+                txtbxInputs[i] = new TextBox();
                 // プロパティ設定
                 txtbxInputs[i].Name = "Input" + problemStrs[i];
                 txtbxInputs[i].Text = "";
@@ -153,8 +180,8 @@ namespace AutoJudge
                 txtbxInputs[i].AcceptsReturn = true;
                 txtbxInputs[i].Multiline = true;
                 // イベントハンドラに関連付け
-                txtbxInputs[i].TextChanged += new EventHandler(txtbxInputs_Changed);
-                txtbxInputs[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
+                txtbxInputs[i].TextChanged += new EventHandler(TxtbxInputs_Changed);
+                txtbxInputs[i].KeyDown += new KeyEventHandler(TextBox_KeyDown);
 
             }
             // フォームにコントロールを追加
@@ -162,14 +189,14 @@ namespace AutoJudge
             ResumeLayout(false);
         }
 
-        private void makeAnswerTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputAnsMerge)
+        private void MakeAnswerTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputAnsMerge)
         {
-            txtbxAnswers = new System.Windows.Forms.TextBox[testCaseNum];
+            txtbxAnswers = new TextBox[testCaseNum];
             SuspendLayout();
             for (int i = 0; i < txtbxAnswers.Length; i++)
             {
                 // インスタンス作成
-                txtbxAnswers[i] = new System.Windows.Forms.TextBox();
+                txtbxAnswers[i] = new TextBox();
                 // プロパティ設定
                 txtbxAnswers[i].Name = "GroundTruth" + problemStrs[i];
                 txtbxAnswers[i].Text = "";
@@ -178,22 +205,22 @@ namespace AutoJudge
                 txtbxAnswers[i].AcceptsReturn = true;
                 txtbxAnswers[i].Multiline = true;
                 // イベントハンドラに関連付け
-                txtbxAnswers[i].TextChanged += new EventHandler(txtbxAnswers_Changed);
-                txtbxAnswers[i].KeyDown += new KeyEventHandler(textBox_KeyDown);
+                txtbxAnswers[i].TextChanged += new EventHandler(TxtbxAnswers_Changed);
+                txtbxAnswers[i].KeyDown += new KeyEventHandler(TextBox_KeyDown);
             }
             //フォームにコントロールを追加
             Controls.AddRange(txtbxAnswers);
             ResumeLayout(false);
         }
 
-        private void makeSampleLable(int height, int x, int offset, int mergUp)
+        private void MakeSampleLable(int height, int x, int offset, int mergUp)
         {
-            labelSample = new System.Windows.Forms.Label[testCaseNum];
+            labelSample = new Label[testCaseNum];
             SuspendLayout();
             for (int i = 0; i < labelSample.Length; i++)
             {
                 // インスタンス作成
-                labelSample[i] = new System.Windows.Forms.Label();
+                labelSample[i] = new Label();
                 // プロパティ設定
                 labelSample[i].Name = "Sample" + problemStrs[i];
                 labelSample[i].Text = "";
@@ -206,14 +233,14 @@ namespace AutoJudge
             ResumeLayout(false);
         }
 
-        private void makeCheckLable(int height, int x, int offset, int mergUp)
+        private void MakeCheckLable(int height, int x, int offset, int mergUp)
         {
-            labelCheck = new System.Windows.Forms.Label[testCaseNum];
+            labelCheck = new Label[testCaseNum];
             SuspendLayout();
             for (int i = 0; i < labelCheck.Length; i++)
             {
                 // インスタンス作成
-                labelCheck[i] = new System.Windows.Forms.Label();
+                labelCheck[i] = new Label();
                 // プロパティ設定
                 labelCheck[i].Name = "Check" + problemStrs[i];
                 labelCheck[i].Text = "";
@@ -229,25 +256,43 @@ namespace AutoJudge
         }
 
         // 背景の描画
-        private Image setBackgroundImage(Image img)
+        private Image SetBackgroundImage()
         {
+            string settingFile = "settings.txt";
+            if (!System.IO.File.Exists(settingFile))
+                return null;
+            System.IO.StreamReader cReader = (
+                new System.IO.StreamReader(settingFile, System.Text.Encoding.Default)
+            );
+
+            string fileName = string.Empty;
+            fileName = cReader.ReadLine();
+            float[] matrixV = new float[5];
+            for(int i = 0; i < 5; i++)
+                matrixV[i] = float.Parse(cReader.ReadLine());
+            cReader.Close();
+
+
             // http://dobon.net/vb/dotnet/graphics/hadeinimage.html
             // 画像を読み込む
+            if (!System.IO.File.Exists(fileName))
+                return null;
+            Image img = System.Drawing.Image.FromFile(fileName);
             int bgImgWith = img.Width, bgImgHeight = img.Height;
             // 描画先とするImageオブジェクトを作成する
             Bitmap canvas = new Bitmap(bgImgWith, bgImgHeight);
             // ImageオブジェクトのGraphicsオブジェクトを作成する
             Graphics g = Graphics.FromImage(canvas);
             // ColorMatrixオブジェクトの作成
-            System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix();
+            ColorMatrix cm = new ColorMatrix();
             // ColorMatrixの行列の値を変更し，好きな色にする
-            cm.Matrix00 = 1;
-            cm.Matrix11 = 0.9f;
-            cm.Matrix22 = 1;
-            cm.Matrix33 = 0.5F;
-            cm.Matrix44 = 1;
+            cm.Matrix00 = matrixV[0];
+            cm.Matrix11 = matrixV[1];
+            cm.Matrix22 = matrixV[2];
+            cm.Matrix33 = matrixV[3];
+            cm.Matrix44 = matrixV[4];
             // ImageAttributesオブジェクトの作成
-            System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+            ImageAttributes ia = new ImageAttributes();
             // ColorMatrixを設定する
             ia.SetColorMatrix(cm);
             // ImageAttributesを使用して画像を描画
@@ -259,9 +304,9 @@ namespace AutoJudge
         }
 
         // 特定の範囲への背景の描画
-        private void setBackgroundImage(Image img, int x, int y)
+        private void SetBackgroundImage(int x, int y)
         {
-            Image backImage = setBackgroundImage(img);
+            Image backImage = SetBackgroundImage();
             SuspendLayout();
             // インスタンス作成
             labelBack = new Label();
@@ -282,6 +327,5 @@ namespace AutoJudge
             Controls.Add(labelBack);
             // BackgroundImageLayout = ImageLayout.Zoom;
         }
-
     }
 }

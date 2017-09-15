@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Security.Permissions;
 
 namespace AutoJudge
 {
     public partial class Form1 : Form
     {
         // 1つのディレクトリにすべての実行ファイルを置いておく
-        string answerFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\GoogleDrive\ProgrammingContest\ruby\vimcodes\";
+        string answerFilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\GoogleDrive\ProgrammingContest\ruby\vimcodes\";
         string fileType = ".rb";
 
-        string[] problemStrs = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" }; // 実行ファイル名
+        string[] problemStrs = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" }; // 実行ファイル名 e.g. A.rb, A.exe
         Dictionary<string, int> problemNums = new Dictionary<string, int>();
 
         int problemNum = 8; // 表示するタブ数, 11以上は problemStrs に追加が必要
@@ -36,7 +29,7 @@ namespace AutoJudge
 
         bool tabChanged = false; // タブが変わった時にジャッジされないように
         bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
-
+        bool refreshing = false; // // テストケースをクリアしているときにジャッジされないように
         bool onStart; // 起動したときにジャッジされないように
 
         public Form1()
@@ -46,28 +39,28 @@ namespace AutoJudge
 
             if (style == 1) // タイトルバーをなくす
             {
-                this.FormBorderStyle = FormBorderStyle.None;
+                FormBorderStyle = FormBorderStyle.None;
             }
             else if (style == 2) // サイズ変更できるように
             {
-                this.ControlBox = false;
-                this.Text = "";
+                ControlBox = false;
+                Text = "";
             }
             else if (style == 3) // style 1 で最小化の挙動が気になるとき
             {
-                this.FormBorderStyle = FormBorderStyle.FixedSingle;
-                this.ControlBox = false;
-                this.Text = "";
+                FormBorderStyle = FormBorderStyle.FixedSingle;
+                ControlBox = false;
+                Text = "";
             }
 
-            init();
-            loadFile();
+            Init();
+            LoadFile();
 
             // このForm1()が終わった後に1度Form1_Activated()が呼ばれる
             if (!updateOnActivated) onStart = false;
         }
 
-        private void init()
+        private void Init()
         {
             for (int i = 0; i < problemStrs.Length; i++)
                 problemNums[problemStrs[i]] = i;
@@ -79,7 +72,7 @@ namespace AutoJudge
             checks = new string[problemNum, testCaseNum];
             errors = new string[problemNum, testCaseNum];
 
-            makeControlls();
+            MakeControlls();
         }
 
         // 背景をドラッグしてウィンドウを移動できるように
@@ -101,12 +94,12 @@ namespace AutoJudge
                 // 最大化されたときにドラッグで元に戻す
                 if (WindowState == FormWindowState.Maximized && mousePoint.Y < 20)
                     WindowState = FormWindowState.Normal;
-                this.Left += e.X - mousePoint.X;
-                this.Top += e.Y - mousePoint.Y;
+                Left += e.X - mousePoint.X;
+                Top += e.Y - mousePoint.Y;
             }
         }
 
-        private void btnTabs_Click(object sender, EventArgs e)
+        private void BtnTabs_Click(object sender, EventArgs e)
         {
             Console.WriteLine("tab clicked");
 
@@ -119,14 +112,14 @@ namespace AutoJudge
 
             Console.WriteLine("tab changed");
 
-            changeProblemNowTo(btnIDN);
+            ChangeProblemNowTo(btnIDN);
             // タブが変わった時にジャッジされないように
             tabChanged = true;
-            loadDataToTab();
+            LoadDataToTab();
             tabChanged = false;
         }
 
-        private void loadDataToTab()
+        private void LoadDataToTab()
         {
             for (int i = 0; i < testCaseNum; i++)
             {
@@ -135,7 +128,7 @@ namespace AutoJudge
                 labelSample[i].Text = samples[problemNowN, i];
                 labelCheck[i].Text = checks[problemNowN, i];
             }
-            checkAll(); // 色情報は保持していないので再チェック
+            CheckAll(); // 色情報は保持していないので再チェック
 
             // 選択されているタブの色を白色に
             for (int i = 0; i < problemNum; i++)
@@ -143,100 +136,120 @@ namespace AutoJudge
             btnTabs[problemNowN].BackColor = Color.White;
         }
 
-        private void changeProblemNowTo(int i)
+        private void ChangeProblemNowTo(int i)
         {
             problemNowN = i;
             problemNowS = problemStrs[i];
         }
 
-        private void changeProblemNowTo(string s)
+        private void ChangeProblemNowTo(string s)
         {
             problemNowN = problemNums[s];
             problemNowS = s;
         }
 
-        private void btnExeAll_Click(object sender, EventArgs e)
+        private void BtnExeAll_Click(object sender, EventArgs e)
         {
-            exeAllcheckAll();
+            ExeAllcheckAll();
         }
 
-        private void btnUpdate_MouseUp(object sender, MouseEventArgs e)
+        private void BtnUpdate_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 if (!updateOnActivated)
                 {
-                    exeAllcheckAll();
+                    ExeAllcheckAll();
                 }
             }
             else if (e.Button == MouseButtons.Right)
             {
                 updateOnActivated = !updateOnActivated;
-                setUpdateBtn(updateOnActivated ? 1 : 0);
+                SetUpdateBtn(updateOnActivated ? 1 : 0);
                 //loadFile();
             }
         }
 
-        // プログラム終了
-        private void btnClose_Click(object sender, EventArgs e)
+        // 開いている問題のテストケースをクリア
+        private void BtnRefresh_DoubleClick(object sender, EventArgs e)
         {
-            saveFile();
+            RefreshTestCase();
+        }
+
+        // プログラム終了
+        private void BtnClose_Click(object sender, EventArgs e)
+        {
+            SaveFile();
             Close();
         }
 
         // フォームを最小化
-        private void btnMinimize_Click(object sender, EventArgs e)
+        private void BtnMinimize_Click(object sender, EventArgs e)
         {
             switch (WindowState)
             {
                 case FormWindowState.Maximized:
-                    this.WindowState = FormWindowState.Normal;
+                    WindowState = FormWindowState.Normal;
                     break;
                 default:
-                    this.WindowState = FormWindowState.Minimized;
+                    WindowState = FormWindowState.Minimized;
                     break;
             }
         }
 
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("form size changed");
             if (!onStart)
             {
                 switch (WindowState)
                 {
                     case FormWindowState.Maximized:
-                        btnMinimize.Text = "□";
+                        // フォームが最小化、最大化された時は、元の状態に戻す
+                        WindowState = FormWindowState.Normal;
+                        // btnMinimize.Text = "□";
                         break;
                     default:
                         btnMinimize.Text = "-";
                         break;
                 }
-
             }
         }
 
-        private void exeAll()
+        private void ExeAll()
         {
             for (int i = 0; i < testCaseNum; i++)
-                samples[problemNowN, i] = (labelSample[i].Text = excute_byIDn(i));
+                samples[problemNowN, i] = (labelSample[i].Text = Excute_byIDn(i));
         }
 
-        private void checkAll()
+        private void CheckAll()
         {
             for (int i = 0; i < testCaseNum; i++)
-                checkAns(i);
+                CheckAns(i);
         }
 
-        private void exeAllcheckAll()
+        private void ExeAllcheckAll()
         {
-            exeAll();
-            checkAll();
+            ExeAll();
+            CheckAll();
         }
 
-        private void txtbxInputs_Changed(object sender, EventArgs e)
+        private void RefreshTestCase()
         {
-            if (tabChanged || onStart)
+            refreshing = true;
+            for (int i = 0; i < testCaseNum; i++)
+            {
+                txtbxInputs[i].Text = "";
+                txtbxAnswers[i].Text = "";
+                inputs[problemNowN, i] = "";
+                groundTruth[problemNowN, i] = "";
+            }
+            refreshing = true;
+            ExeAllcheckAll();
+        }
+
+        private void TxtbxInputs_Changed(object sender, EventArgs e)
+        {
+            if (tabChanged || onStart || refreshing)
                 return;
 
             Console.WriteLine("inputs changed");
@@ -244,21 +257,21 @@ namespace AutoJudge
             string txtboxName = ((TextBox)sender).Name;
             string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
             int txtboxIDn = problemNums[txtboxIDs];
-            saveInputToArray(txtboxIDn);
+            SaveInputToArray(txtboxIDn);
 
             // 入力された文字列を渡して実行
             Console.WriteLine("excute txtboxId : " + txtboxIDn);
-            string tmpres = excute_byIDn(txtboxIDn);
+            string tmpres = Excute_byIDn(txtboxIDn);
             // 表示と保存
             samples[problemNowN, txtboxIDn] = (labelSample[txtboxIDn].Text = tmpres);
 
             // 答え合わせ
-            checkAns(txtboxIDn);
+            CheckAns(txtboxIDn);
         }
 
-        private void txtbxAnswers_Changed(object sender, EventArgs e)
+        private void TxtbxAnswers_Changed(object sender, EventArgs e)
         {
-            if (tabChanged || onStart)
+            if (tabChanged || onStart || refreshing)
                 return;
 
             Console.WriteLine("answers changed");
@@ -266,31 +279,31 @@ namespace AutoJudge
             string txtboxName = ((TextBox)sender).Name;
             string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
             int txtboxIDn = problemNums[txtboxIDs];
-            saveGTToArray(txtboxIDn);
+            SaveGTToArray(txtboxIDn);
 
             // 答え合わせ
-            checkAns(txtboxIDn);
+            CheckAns(txtboxIDn);
         }
 
-        private void saveInputToArray(int id)
+        private void SaveInputToArray(int id)
         {
             inputs[problemNowN, id] = txtbxInputs[id].Text;
         }
 
-        private void saveGTToArray(int id)
+        private void SaveGTToArray(int id)
         {
             groundTruth[problemNowN, id] = txtbxAnswers[id].Text;
         }
 
         // Ctr + A で全選択
-        private void textBox_KeyDown(object sender, KeyEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.A)
                 ((TextBox)sender).SelectAll();
         }
 
         // 出力が正しいかを判定して表示
-        private void checkAns(int id)
+        private void CheckAns(int id)
         {
             string gt = txtbxAnswers[id].Text;
             string smp = labelSample[id].Text;
@@ -323,18 +336,18 @@ namespace AutoJudge
         }
 
         // テストケースをIDで指定して実行
-        private string excute_byIDn(int idn)
+        private string Excute_byIDn(int idn)
         {
             string ID = problemNowS;
             string input = txtbxInputs[idn].Text;
             string gt = txtbxAnswers[idn].Text;
             if (input == "" && gt == "") return ""; // 何も入力されていない場合は実行しない
-            string res = excute(ID, input);
-            setError(idn);
+            string res = Excute(ID, input);
+            SetError(idn);
             return res;
         }
 
-        private void setError(int id)
+        private void SetError(int id)
         {
             Console.WriteLine("setting error " + problemNowN + " " + id + " " + id + " ");
             errors[problemNowN, id] = errorFlag;
@@ -344,13 +357,13 @@ namespace AutoJudge
         // ダブルクリックした時にジャッジ
         private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            exeAllcheckAll();
+            ExeAllcheckAll();
         }
 
         // 何かキーを押した時にジャッジ, 動かない
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            exeAllcheckAll();
+            ExeAllcheckAll();
         }
 
         // フォームをウィンドウの最前面に持ってくるたびにジャッジ
@@ -361,7 +374,7 @@ namespace AutoJudge
                 if (onStart)
                     onStart = false;
                 else
-                    exeAllcheckAll();
+                    ExeAllcheckAll();
             }
         }
     }

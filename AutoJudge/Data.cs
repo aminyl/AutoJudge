@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -15,7 +14,7 @@ namespace AutoJudge
         private int saveIdxProblemNum = 0, saveIdxTestCaseNum = 1, saveIdxProblemNowN = 2, saveIdxTestCaseStartPoint = 3;
 
         // ファイルへ保存
-        private void saveFile()
+        private void SaveFile()
         {
             ArrayList ar = new ArrayList();
             for (int i = 0; i < saveIdxTestCaseStartPoint; i++)
@@ -38,7 +37,7 @@ namespace AutoJudge
         }
 
         // ファイルから読み出し
-        private void loadFile()
+        private void LoadFile()
         {
             if (!File.Exists(saveFileName))
                 return;
@@ -52,23 +51,23 @@ namespace AutoJudge
             {
                 for (int j = 0; j < testCaseNum; j++)
                 {
-                    inputs[i, j] = replaceReturnCode((string)ar[arIdx++]);
-                    groundTruth[i, j] = replaceReturnCode((string)ar[arIdx++]);
-                    samples[i, j] = replaceReturnCode((string)ar[arIdx++]);
+                    inputs[i, j] = ReplaceReturnCode((string)ar[arIdx++]);
+                    groundTruth[i, j] = ReplaceReturnCode((string)ar[arIdx++]);
+                    samples[i, j] = ReplaceReturnCode((string)ar[arIdx++]);
                     checks[i, j] = (string)ar[arIdx++];
                 }
             }
-            loadDataToTab();
+            LoadDataToTab();
         }
 
-        private string replaceReturnCode(string s)
+        private string ReplaceReturnCode(string s)
         {
             if (s != null)
                 return s.Replace(((char)10).ToString(), "\r\n");
             return "";
         }
 
-        private void SaveFile(ArrayList ar, System.String filename)
+        private void SaveFile(ArrayList ar, String filename)
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             XmlSerializer sr = new XmlSerializer(typeof(ArrayList), new Type[] { typeof(string) });
@@ -76,7 +75,7 @@ namespace AutoJudge
             fs.Close();
         }
 
-        private ArrayList LoadFile(System.String filename)
+        private ArrayList LoadFile(String filename)
         {
             FileStream fs = new FileStream(filename, FileMode.Open);
             XmlSerializer sr = new XmlSerializer(typeof(ArrayList), new Type[] { typeof(string) });

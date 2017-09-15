@@ -9,14 +9,14 @@ namespace AutoJudge
     {
         int timeLimit = 2000; // TLEまでの時間,プログラム実行中,最大この時間UIがフリーズする
 
-        System.Diagnostics.Process p; // コマンドラインで実行
+        Process p; // コマンドラインで実行
         string result, command; // 実行結果, 入力
         Thread rThread;
 
         // filename:プログラムファイル名, input:入力
-        private string excute(string filename, string input)
+        private string Excute(string filename, string input)
         {
-            p = new System.Diagnostics.Process();
+            p = new Process();
             p.StartInfo.FileName = "ruby.exe";
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.UseShellExecute = false;
