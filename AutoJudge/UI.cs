@@ -32,7 +32,7 @@ namespace AutoJudge
 
         private void MakeControlls()
         {
-            int formSizeX = 560, formSizeY = 480;
+            int formSizeX = 640, formSizeY = 480;
             // フォームのサイズ変更
             ClientSize = new Size(formSizeX, formSizeY);
             MaximizeBox = false;
@@ -53,7 +53,7 @@ namespace AutoJudge
                 MakeMinimizeBtn(tabHeight, tabHeight, formSizeX - 2 * tabHeight, 0);
             }
 
-            int txtbxHeight = 80, txtbxWidth = (int)(txtbxHeight * 1.618), txtbxOffset = 1, txtbxMergLeft = 5, txtbxMergUp = 50;
+            int txtbxHeight = 85, txtbxWidth = (int)(txtbxHeight * 1.618), txtbxOffset = 1, txtbxMergLeft = 10, txtbxMergUp = 50;
             int inputAnsMerge = 10;
             int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputAnsMerge;
             int checkLblX = txtbxMergLeft + 3 * txtbxWidth + inputAnsMerge;
@@ -122,9 +122,7 @@ namespace AutoJudge
             btnUpdate = new Button();
             MakeBtn(btnUpdate, "btnUpdate", height, width, x, y);
             btnUpdate.BackgroundImageLayout = ImageLayout.Zoom;
-            // イベントハンドラに関連付け
             btnUpdate.MouseUp += new MouseEventHandler(BtnUpdate_MouseUp);
-            // フォームにコントロールを追加
             Controls.Add(btnUpdate);
             SetUpdateBtn(1);
             ResumeLayout(false);

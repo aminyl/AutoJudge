@@ -93,7 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ico.ico" />
-    <Content Include="Resources\backgroundImage.png" />
     <Content Include="Resources\refresh.png" />
     <Content Include="Resources\setting.png" />
     <Content Include="Resources\update.png" />
