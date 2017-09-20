@@ -256,26 +256,11 @@ namespace AutoJudge
         // 背景の描画
         private Image SetBackgroundImage()
         {
-            string settingFile = "settings.txt";
-            if (!System.IO.File.Exists(settingFile))
-                return null;
-            System.IO.StreamReader cReader = (
-                new System.IO.StreamReader(settingFile, System.Text.Encoding.Default)
-            );
-
-            string fileName = string.Empty;
-            fileName = cReader.ReadLine();
-            float[] matrixV = new float[5];
-            for(int i = 0; i < 5; i++)
-                matrixV[i] = float.Parse(cReader.ReadLine());
-            cReader.Close();
-
-
             // http://dobon.net/vb/dotnet/graphics/hadeinimage.html
             // 画像を読み込む
-            if (!System.IO.File.Exists(fileName))
+            if (!System.IO.File.Exists(backgroundImagePath))
                 return null;
-            Image img = System.Drawing.Image.FromFile(fileName);
+            Image img = System.Drawing.Image.FromFile(backgroundImagePath);
             int bgImgWith = img.Width, bgImgHeight = img.Height;
             // 描画先とするImageオブジェクトを作成する
             Bitmap canvas = new Bitmap(bgImgWith, bgImgHeight);
@@ -284,11 +269,11 @@ namespace AutoJudge
             // ColorMatrixオブジェクトの作成
             ColorMatrix cm = new ColorMatrix();
             // ColorMatrixの行列の値を変更し，好きな色にする
-            cm.Matrix00 = matrixV[0];
-            cm.Matrix11 = matrixV[1];
-            cm.Matrix22 = matrixV[2];
-            cm.Matrix33 = matrixV[3];
-            cm.Matrix44 = matrixV[4];
+            cm.Matrix00 = backgroundMatrixV[0];
+            cm.Matrix11 = backgroundMatrixV[1];
+            cm.Matrix22 = backgroundMatrixV[2];
+            cm.Matrix33 = backgroundMatrixV[3];
+            cm.Matrix44 = backgroundMatrixV[4];
             // ImageAttributesオブジェクトの作成
             ImageAttributes ia = new ImageAttributes();
             // ColorMatrixを設定する

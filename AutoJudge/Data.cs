@@ -10,7 +10,6 @@ namespace AutoJudge
 
     public partial class Form1 : Form
     {
-        private string saveFileName = "TestCases.txt";
         private int saveIdxProblemNum = 0, saveIdxTestCaseNum = 1, saveIdxProblemNowN = 2, saveIdxTestCaseStartPoint = 3;
 
         // ファイルへ保存
@@ -33,16 +32,16 @@ namespace AutoJudge
                     ar.Add(checks[i, j]);
                 }
             }
-            SaveFile(ar, saveFileName);
+            SaveFile(ar, testCasePath);
         }
 
         // ファイルから読み出し
         private void LoadFile()
         {
-            if (!File.Exists(saveFileName))
+            if (!File.Exists(testCasePath))
                 return;
 
-            ArrayList ar = LoadFile(saveFileName);
+            ArrayList ar = LoadFile(testCasePath);
 
             problemNowN = Math.Min(int.Parse((string)ar[saveIdxProblemNowN]), problemNum - 1);
             problemNowS = problemStrs[problemNowN];

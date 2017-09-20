@@ -9,7 +9,6 @@ namespace AutoJudge
     public partial class Form1 : Form
     {
         // 1つのディレクトリにすべての実行ファイルを置いておく
-        string answerFilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\GoogleDrive\ProgrammingContest\ruby\vimcodes\";
         string fileType = ".rb";
 
         string[] problemStrs = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" }; // 実行ファイル名 e.g. A.rb, A.exe
@@ -31,6 +30,13 @@ namespace AutoJudge
         bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
         bool refreshing = false; // // テストケースをクリアしているときにジャッジされないように
         bool onStart; // 起動したときにジャッジされないように
+
+        // 設定
+        string settingFilePath = "settings.txt";
+        string codeFilePath = string.Empty;
+        string testCasePath = "TestCases.txt";
+        string backgroundImagePath = string.Empty;
+        float[] backgroundMatrixV = new float[5];
 
         public Form1()
         {
@@ -62,6 +68,11 @@ namespace AutoJudge
 
         private void Init()
         {
+            if (System.IO.File.Exists(settingFilePath))
+                ReadSettings();
+            else
+                SetSettingsDefault();
+
             for (int i = 0; i < problemStrs.Length; i++)
                 problemNums[problemStrs[i]] = i;
             problemNowS = problemStrs[problemNowN];
@@ -73,6 +84,28 @@ namespace AutoJudge
             errors = new string[problemNum, testCaseNum];
 
             MakeControlls();
+        }
+
+        private void SetSettingsDefault()
+        {
+        }
+
+        private void ReadSettings()
+        {
+            string tag_;
+            System.IO.StreamReader cReader = (
+                new System.IO.StreamReader(settingFilePath, System.Text.Encoding.Default)
+            );
+
+            tag_ = cReader.ReadLine();
+            codeFilePath = cReader.ReadLine();
+            tag_ = cReader.ReadLine();
+            testCasePath = cReader.ReadLine();
+            tag_ = cReader.ReadLine();
+            backgroundImagePath = cReader.ReadLine();
+            for (int i = 0; i < 5; i++)
+                backgroundMatrixV[i] = float.Parse(cReader.ReadLine());
+            cReader.Close();
         }
 
         // 背景をドラッグしてウィンドウを移動できるように

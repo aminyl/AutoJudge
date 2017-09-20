@@ -22,7 +22,7 @@ namespace AutoJudge
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardInput = true;
             p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.Arguments = answerFilePath + filename + fileType;
+            p.StartInfo.Arguments = codeFilePath + filename + fileType;
             // cmd.exe を起動
             p.Start();
             // cmd.exe で実行するコマンドを取得
