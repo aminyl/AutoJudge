@@ -70,8 +70,6 @@ namespace AutoJudge
         {
             if (System.IO.File.Exists(settingFilePath))
                 ReadSettings();
-            else
-                SetSettingsDefault();
 
             for (int i = 0; i < problemStrs.Length; i++)
                 problemNums[problemStrs[i]] = i;
@@ -84,10 +82,6 @@ namespace AutoJudge
             errors = new string[problemNum, testCaseNum];
 
             MakeControlls();
-        }
-
-        private void SetSettingsDefault()
-        {
         }
 
         private void ReadSettings()
