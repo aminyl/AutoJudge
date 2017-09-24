@@ -28,7 +28,6 @@ namespace AutoJudge
 
         bool tabChanged = false; // タブが変わった時にジャッジされないように
         bool updateOnActivated = true; // フォームをウィンドウの最前面に持ってくるたびにジャッジするかどうか、チェックボックスで変更
-        bool refreshing = false; // // テストケースをクリアしているときにジャッジされないように
         bool onStart; // 起動したときにジャッジされないように
 
         // 設定
@@ -151,7 +150,7 @@ namespace AutoJudge
             for (int i = 0; i < testCaseNum; i++)
             {
                 txtbxInputs[i].Text = inputs[problemNowN, i];
-                txtbxAnswers[i].Text = groundTruth[problemNowN, i];
+                txtbxGroundTruth[i].Text = groundTruth[problemNowN, i];
                 labelSample[i].Text = samples[problemNowN, i];
                 labelCheck[i].Text = checks[problemNowN, i];
             }
@@ -262,21 +261,18 @@ namespace AutoJudge
 
         private void RefreshTestCase()
         {
-            refreshing = true;
             for (int i = 0; i < testCaseNum; i++)
             {
                 txtbxInputs[i].Text = "";
-                txtbxAnswers[i].Text = "";
-                inputs[problemNowN, i] = "";
-                groundTruth[problemNowN, i] = "";
+                txtbxGroundTruth[i].Text = "";
+                labelSample[i].Text = "";
+                labelCheck[i].Text = "";
             }
-            refreshing = true;
-            ExeAllcheckAll();
         }
 
         private void TxtbxInputs_Changed(object sender, EventArgs e)
         {
-            if (tabChanged || onStart || refreshing)
+            if (tabChanged || onStart)
                 return;
 
             Console.WriteLine("inputs changed");
@@ -296,12 +292,12 @@ namespace AutoJudge
             CheckAns(txtboxIDn);
         }
 
-        private void TxtbxAnswers_Changed(object sender, EventArgs e)
+        private void TxtbxGroundTruth_Changed(object sender, EventArgs e)
         {
-            if (tabChanged || onStart || refreshing)
+            if (tabChanged || onStart)
                 return;
 
-            Console.WriteLine("answers changed");
+            Console.WriteLine("ground truth changed");
             string txtboxText = ((TextBox)sender).Text;
             string txtboxName = ((TextBox)sender).Name;
             string txtboxIDs = txtboxName.Substring(txtboxName.Length - 1);
@@ -319,7 +315,7 @@ namespace AutoJudge
 
         private void SaveGTToArray(int id)
         {
-            groundTruth[problemNowN, id] = txtbxAnswers[id].Text;
+            groundTruth[problemNowN, id] = txtbxGroundTruth[id].Text;
         }
 
         // Ctr + A で全選択
@@ -332,7 +328,7 @@ namespace AutoJudge
         // 出力が正しいかを判定して表示
         private void CheckAns(int id)
         {
-            string gt = txtbxAnswers[id].Text;
+            string gt = txtbxGroundTruth[id].Text;
             string smp = labelSample[id].Text;
             string res;
             if (gt == "")
@@ -367,7 +363,7 @@ namespace AutoJudge
         {
             string ID = problemNowS;
             string input = txtbxInputs[idn].Text;
-            string gt = txtbxAnswers[idn].Text;
+            string gt = txtbxGroundTruth[idn].Text;
             if (input == "" && gt == "") return ""; // 何も入力されていない場合は実行しない
             string res = Excute(ID, input);
             SetError(idn);

@@ -22,7 +22,7 @@ namespace AutoJudge
         private Button btnMinimize;
         private Button btnClose;
         private TextBox[] txtbxInputs;
-        private TextBox[] txtbxAnswers;
+        private TextBox[] txtbxGroundTruth;
         private Label[] labelSample;
         private Label[] labelCheck;
         private Label labelBack;
@@ -54,11 +54,11 @@ namespace AutoJudge
             }
 
             int txtbxHeight = 85, txtbxWidth = (int)(txtbxHeight * 1.618), txtbxOffset = 1, txtbxMergLeft = 10, txtbxMergUp = 50;
-            int inputAnsMerge = 10;
-            int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputAnsMerge;
-            int checkLblX = txtbxMergLeft + 3 * txtbxWidth + inputAnsMerge;
+            int inputGtMerge = 10;
+            int sampleLblX = txtbxMergLeft + 2 * txtbxWidth + inputGtMerge;
+            int checkLblX = txtbxMergLeft + 3 * txtbxWidth + inputGtMerge;
             MakeInputTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp);
-            MakeAnswerTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp, inputAnsMerge);
+            MakeGroundTruthTxtBox(txtbxHeight, txtbxWidth, txtbxOffset, txtbxMergLeft, txtbxMergUp, inputGtMerge);
             MakeSampleLable(txtbxHeight, sampleLblX, txtbxOffset, txtbxMergUp);
             MakeCheckLable(txtbxHeight, checkLblX, txtbxOffset, txtbxMergUp);
 
@@ -187,27 +187,27 @@ namespace AutoJudge
             ResumeLayout(false);
         }
 
-        private void MakeAnswerTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputAnsMerge)
+        private void MakeGroundTruthTxtBox(int height, int width, int offset, int mergLeft, int mergUp, int inputGtMerge)
         {
-            txtbxAnswers = new TextBox[testCaseNum];
+            txtbxGroundTruth = new TextBox[testCaseNum];
             SuspendLayout();
-            for (int i = 0; i < txtbxAnswers.Length; i++)
+            for (int i = 0; i < txtbxGroundTruth.Length; i++)
             {
                 // インスタンス作成
-                txtbxAnswers[i] = new TextBox();
+                txtbxGroundTruth[i] = new TextBox();
                 // プロパティ設定
-                txtbxAnswers[i].Name = "GroundTruth" + problemStrs[i];
-                txtbxAnswers[i].Text = "";
-                txtbxAnswers[i].Size = new Size(width, height);
-                txtbxAnswers[i].Location = new Point(mergLeft + width + inputAnsMerge, i * height - i * offset + mergUp);
-                txtbxAnswers[i].AcceptsReturn = true;
-                txtbxAnswers[i].Multiline = true;
+                txtbxGroundTruth[i].Name = "GroundTruth" + problemStrs[i];
+                txtbxGroundTruth[i].Text = "";
+                txtbxGroundTruth[i].Size = new Size(width, height);
+                txtbxGroundTruth[i].Location = new Point(mergLeft + width + inputGtMerge, i * height - i * offset + mergUp);
+                txtbxGroundTruth[i].AcceptsReturn = true;
+                txtbxGroundTruth[i].Multiline = true;
                 // イベントハンドラに関連付け
-                txtbxAnswers[i].TextChanged += new EventHandler(TxtbxAnswers_Changed);
-                txtbxAnswers[i].KeyDown += new KeyEventHandler(TextBox_KeyDown);
+                txtbxGroundTruth[i].TextChanged += new EventHandler(TxtbxGroundTruth_Changed);
+                txtbxGroundTruth[i].KeyDown += new KeyEventHandler(TextBox_KeyDown);
             }
             //フォームにコントロールを追加
-            Controls.AddRange(txtbxAnswers);
+            Controls.AddRange(txtbxGroundTruth);
             ResumeLayout(false);
         }
 
